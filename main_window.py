@@ -21,6 +21,8 @@ class MainWindow(QWidget):
         self.json_enabled = False
         self.flask_thread = FlaskThread()
         self.custom_json = ''
+        self.auth_type = 'None'
+        self.server_running = False
 
         self.initUI()
 
@@ -36,6 +38,27 @@ class MainWindow(QWidget):
         self.port_input = QLineEdit()
         self.port_input.setPlaceholderText('Enter port (default is 4000)')
         self.layout.addWidget(self.port_input)
+
+        self.auth_option_label = QLabel('Authentication Type:')
+        self.layout.addWidget(self.auth_option_label)
+
+        self.auth_option_combo = QComboBox()
+        self.auth_option_combo.addItems(['None', 'Basic Auth'])
+        self.auth_option_combo.currentIndexChanged.connect(
+            self.update_auth_fields
+        )
+        self.layout.addWidget(self.auth_option_combo)
+
+        self.username_input = QLineEdit()
+        self.username_input.setPlaceholderText('Username')
+        self.username_input.setVisible(False)
+        self.layout.addWidget(self.username_input)
+
+        self.password_input = QLineEdit()
+        self.password_input.setPlaceholderText('Password')
+        self.password_input.setVisible(False)
+        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.layout.addWidget(self.password_input)
 
         self.json_option_label = QLabel('JSON Option:')
         self.layout.addWidget(self.json_option_label)
@@ -100,6 +123,17 @@ class MainWindow(QWidget):
                 self.json_input.setDisabled(False)
                 self.json_input.setText(self.custom_json)
 
+    def update_auth_fields(self):
+        self.auth_type = self.auth_option_combo.currentText()
+        if self.auth_type == 'Basic Auth':
+            self.username_input.setVisible(True)
+            self.password_input.setVisible(True)
+            self.username_input.setDisabled(self.server_running)
+            self.password_input.setDisabled(self.server_running)
+        else:
+            self.username_input.setVisible(False)
+            self.password_input.setVisible(False)
+
     def update_status_indicator(self):
         if self.json_enabled:
             self.status_indicator.setText('Active')
@@ -115,6 +149,20 @@ class MainWindow(QWidget):
     def toggle_server(self):
         if not self.json_enabled:
             try:
+                if self.auth_type == 'Basic Auth':
+                    username = self.username_input.text()
+                    password = self.password_input.text()
+                    if not username or not password:
+                        QMessageBox.critical(
+                            self,
+                            'Error',
+                            'Username and password must be defined for Basic Auth!',
+                        )
+                        return
+                else:
+                    username = ''
+                    password = ''
+
                 if (
                     self.json_option_combo.currentText()
                     == 'Write your own JSON'
@@ -129,19 +177,27 @@ class MainWindow(QWidget):
                     json_data = json.loads(self.custom_json)
 
                 self.flask_thread.update_json(json_data)
-                port = (
+                self.flask_thread.update_port(
                     int(self.port_input.text())
                     if self.port_input.text().isdigit()
                     else 4000
                 )
-                self.flask_thread.update_port(port)
+                self.flask_thread.update_auth(
+                    self.auth_type, username, password
+                )
                 self.flask_thread.start()
-                self.url_label.setText(f'URL: http://localhost:{port}')
+                self.url_label.setText(
+                    f'URL: http://localhost:{self.flask_thread.port}'
+                )
                 self.toggle_button.setText('Disable')
                 self.json_enabled = True
+                self.server_running = True
 
                 self.port_input.setDisabled(True)
                 self.json_option_combo.setDisabled(True)
+                self.auth_option_combo.setDisabled(True)
+
+                self.update_auth_fields()
                 self.update_status_indicator()
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
@@ -151,9 +207,12 @@ class MainWindow(QWidget):
             self.flask_thread = FlaskThread()
             self.toggle_button.setText('Enable')
             self.json_enabled = False
+            self.server_running = False
 
             self.port_input.setDisabled(False)
             self.json_option_combo.setDisabled(False)
+            self.auth_option_combo.setDisabled(False)
 
             self.update_json_fields()
+            self.update_auth_fields()
             self.update_status_indicator()
