@@ -1,4 +1,3 @@
-# flask_thread.py
 from PyQt6.QtCore import QThread, pyqtSignal
 from flask import Flask, jsonify
 from werkzeug.serving import make_server
