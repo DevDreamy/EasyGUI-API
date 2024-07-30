@@ -1,14 +1,24 @@
 import sys
 import json
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QTextEdit, QMessageBox
-from PyQt6.QtCore import QThread, pyqtSignal
-from flask import Flask, jsonify, request
+from PyQt6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+    QMessageBox,
+    QLineEdit,
+)
+from PyQt6.QtCore import QThread
+from flask import Flask, jsonify
 
 
 class FlaskThread(QThread):
     def __init__(self):
         super().__init__()
         self.json_data = {}
+        self.port = 4000
 
     def run(self):
         app = Flask(__name__)
@@ -17,10 +27,13 @@ class FlaskThread(QThread):
         def jsonResponse():
             return jsonify(self.json_data)
 
-        app.run(host='localhost', port=4000)
+        app.run(host='localhost', port=self.port)
 
     def update_json(self, new_json):
         self.json_data = new_json
+
+    def update_port(self, port):
+        self.port = port
 
 
 class MainWindow(QWidget):
@@ -37,8 +50,12 @@ class MainWindow(QWidget):
 
         self.layout = QVBoxLayout()
 
-        self.url_label = QLabel('URL: localhost:4000')
+        self.url_label = QLabel('URL:')
         self.layout.addWidget(self.url_label)
+
+        self.port_input = QLineEdit()
+        self.port_input.setPlaceholderText('Enter port (default is 4000)')
+        self.layout.addWidget(self.port_input)
 
         self.json_input = QTextEdit()
         self.json_input.setPlaceholderText('Enter JSON here...')
@@ -55,12 +72,20 @@ class MainWindow(QWidget):
             try:
                 json_data = json.loads(self.json_input.toPlainText())
                 self.flask_thread.update_json(json_data)
+                port = (
+                    int(self.port_input.text())
+                    if self.port_input.text().isdigit()
+                    else 4000
+                )
+                self.flask_thread.update_port(port)
                 self.flask_thread.start()
+                self.url_label.setText(f'URL: http://localhost:{port}')
                 self.toggle_button.setText('Disable')
                 self.json_enabled = True
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
         else:
+            # Restart the thread to update the JSON data and stop the server
             self.flask_thread.terminate()
             self.flask_thread = FlaskThread()
             self.toggle_button.setText('Enable')
