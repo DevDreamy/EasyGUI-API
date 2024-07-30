@@ -1,4 +1,3 @@
-# main_window.py
 import json
 from PyQt6.QtWidgets import (
     QWidget,
@@ -19,6 +18,7 @@ class MainWindow(QWidget):
 
         self.json_enabled = False
         self.flask_thread = FlaskThread()
+        self.custom_json = ''
 
         self.initUI()
 
@@ -64,16 +64,31 @@ class MainWindow(QWidget):
             if json_option == 'Use default JSON':
                 self.json_input.setDisabled(True)
                 self.json_input.setText(
-                    json.dumps({'message': 'This is the default JSON response'})
+                    json.dumps(
+                        {'message': 'This is the default JSON response'},
+                        indent=4,
+                    )
                 )
             else:
                 self.json_input.setDisabled(False)
-                self.json_input.setText('')
+                self.json_input.setText(self.custom_json)
 
     def toggle_server(self):
         if not self.json_enabled:
             try:
-                json_data = json.loads(self.json_input.toPlainText())
+                if (
+                    self.json_option_combo.currentText()
+                    == 'Write your own JSON'
+                ):
+                    self.custom_json = self.json_input.toPlainText()
+                    json_data = json.loads(self.custom_json)
+                else:
+                    self.custom_json = json.dumps(
+                        {'message': 'This is the default JSON response'},
+                        indent=4,
+                    )
+                    json_data = json.loads(self.custom_json)
+
                 self.flask_thread.update_json(json_data)
                 port = (
                     int(self.port_input.text())
