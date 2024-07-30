@@ -2,6 +2,7 @@ import json
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTextEdit,
@@ -9,6 +10,7 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QLineEdit,
 )
+from PyQt6.QtCore import Qt
 from flask_thread import FlaskThread
 
 
@@ -55,9 +57,33 @@ class MainWindow(QWidget):
         self.toggle_button.clicked.connect(self.toggle_server)
         self.layout.addWidget(self.toggle_button)
 
+        self.status_layout = QHBoxLayout()
+        self.status_layout.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom
+        )
+
+        self.status_text = QLabel('Status:')
+        self.status_layout.addWidget(self.status_text)
+
+        self.status_indicator = QLabel()
+        self.status_indicator.setFixedSize(80, 30)
+        self.status_indicator.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.status_indicator.setStyleSheet(
+            'border-radius: 15px; '
+            'color: white; '
+            'background-color: red; '
+            'text-align: center; '
+            'font-weight: bold; '
+            'padding: 5px; '
+        )
+        self.status_layout.addWidget(self.status_indicator)
+
+        self.layout.addLayout(self.status_layout)
+
         self.setLayout(self.layout)
 
         self.update_json_fields()
+        self.update_status_indicator()
 
     def update_json_fields(self):
         if not self.json_enabled:
@@ -73,6 +99,18 @@ class MainWindow(QWidget):
             else:
                 self.json_input.setDisabled(False)
                 self.json_input.setText(self.custom_json)
+
+    def update_status_indicator(self):
+        if self.json_enabled:
+            self.status_indicator.setText('Active')
+            self.status_indicator.setStyleSheet(
+                'background-color: green; color: white; border-radius: 15px; padding: 3px; text-align: center; font-weight: bold;'
+            )
+        else:
+            self.status_indicator.setText('Inactive')
+            self.status_indicator.setStyleSheet(
+                'background-color: red; color: white; border-radius: 15px; padding: 3px; text-align: center; font-weight: bold;'
+            )
 
     def toggle_server(self):
         if not self.json_enabled:
@@ -104,6 +142,7 @@ class MainWindow(QWidget):
 
                 self.port_input.setDisabled(True)
                 self.json_option_combo.setDisabled(True)
+                self.update_status_indicator()
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
         else:
@@ -117,3 +156,4 @@ class MainWindow(QWidget):
             self.json_option_combo.setDisabled(False)
 
             self.update_json_fields()
+            self.update_status_indicator()
