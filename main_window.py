@@ -24,6 +24,7 @@ class MainWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle('JSON Server')
+        self.resize(400, 400)
 
         self.layout = QVBoxLayout()
 
