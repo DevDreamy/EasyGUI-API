@@ -1,4 +1,4 @@
-# EasyGUIApi
+# Easy GUI API
 
 This is a straightforward Python application that sets up a JSON server with an intuitive interface for configuring response data and authentication methods.
 
