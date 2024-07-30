@@ -111,7 +111,7 @@ class MainWindow(QWidget):
 
     def update_auth_fields(self):
         self.auth_type = self.auth_option_combo.currentText()
-        if self.auth_type == 'JWT Auth':
+        if self.auth_type == 'JWT Bearer Auth':
             self.auth_info_label.setText(
                 'Login URL: localhost:4000/login\nUsername: user\nPassword: password'
             )
