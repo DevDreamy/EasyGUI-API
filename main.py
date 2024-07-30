@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QTextEdit,
     QMessageBox,
+    QComboBox,
     QLineEdit,
 )
 from PyQt6.QtCore import QThread
@@ -57,6 +58,18 @@ class MainWindow(QWidget):
         self.port_input.setPlaceholderText('Enter port (default is 4000)')
         self.layout.addWidget(self.port_input)
 
+        self.json_option_label = QLabel('JSON Option:')
+        self.layout.addWidget(self.json_option_label)
+
+        self.json_option_combo = QComboBox()
+        self.json_option_combo.addItems(
+            ['Use default JSON', 'Write your own JSON']
+        )
+        self.json_option_combo.currentIndexChanged.connect(
+            self.update_json_fields
+        )
+        self.layout.addWidget(self.json_option_combo)
+
         self.json_input = QTextEdit()
         self.json_input.setPlaceholderText('Enter JSON here...')
         self.layout.addWidget(self.json_input)
@@ -66,6 +79,19 @@ class MainWindow(QWidget):
         self.layout.addWidget(self.toggle_button)
 
         self.setLayout(self.layout)
+
+        self.update_json_fields()
+
+    def update_json_fields(self):
+        json_option = self.json_option_combo.currentText()
+        if json_option == 'Use default JSON':
+            self.json_input.setDisabled(True)
+            self.json_input.setText(
+                json.dumps({'message': 'This is the default JSON response'})
+            )
+        else:
+            self.json_input.setDisabled(False)
+            self.json_input.setText('')
 
     def toggle_server(self):
         if not self.json_enabled:
