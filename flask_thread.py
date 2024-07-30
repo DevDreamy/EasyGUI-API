@@ -1,7 +1,8 @@
 from PyQt6.QtCore import QThread, pyqtSignal
-from flask import Flask, jsonify, request, Response
+from flask import Flask, jsonify, request, Response, make_response
 from werkzeug.serving import make_server
-from werkzeug.security import check_password_hash, generate_password_hash
+import datetime
+import jwt
 
 
 class FlaskThread(QThread):
@@ -12,8 +13,9 @@ class FlaskThread(QThread):
         self.json_data = {}
         self.port = 4000
         self.auth_type = 'None'
-        self.username = ''
-        self.password = ''
+        self.username = 'user'
+        self.password = 'password'
+        self.secret_key = 'secret_key'
         self._server = None
         self._app = Flask(__name__)
 
@@ -21,11 +23,43 @@ class FlaskThread(QThread):
         def jsonResponse():
             if self.auth_type == 'Basic Auth':
                 auth = request.authorization
-                if not auth or not self.check_auth(
-                    auth.username, auth.password
-                ):
-                    return self.authenticate()
+                if not auth or not self.check_auth(auth.username, auth.password):
+                    return self.authenticate_basic()
+            elif self.auth_type == 'JWT Auth':
+                auth_header = request.headers.get('Authorization')
+                if auth_header and auth_header.startswith('Bearer '):
+                    token = auth_header.split(' ')[1]
+                    if not self.check_jwt(token):
+                        return self.authenticate_jwt()
+                else:
+                    return self.authenticate_jwt()
             return jsonify(self.json_data)
+
+        @self._app.route('/login', methods=['POST'])
+        def login():
+            auth = request.authorization
+            if (
+                auth
+                and auth.username == self.username
+                and auth.password == self.password
+            ):
+                token = jwt.encode(
+                    {
+                        'user': auth.username,
+                        'exp': datetime.datetime.utcnow()
+                        + datetime.timedelta(minutes=30),
+                    },
+                    self.secret_key,
+                    algorithm="HS256",
+                )
+                return jsonify({'token': token})
+            return make_response(
+                'Incorrect username or password.\n'
+                'Expected: user | password\n'
+                f'Received: {auth.username} | {auth.password}',
+                401,
+                {'WWW-Authenticate': 'Basic realm="Login Required"'},
+            )
 
     def run(self):
         self._server = make_server('localhost', self.port, self._app)
@@ -37,24 +71,36 @@ class FlaskThread(QThread):
     def update_port(self, port):
         self.port = port
 
-    def update_auth(self, auth_type, username='', password=''):
+    def update_auth(self, auth_type):
         self.auth_type = auth_type
-        self.username = username
-        self.password = generate_password_hash(password)
 
     def check_auth(self, username, password):
-        """Check if a username/password combination is correct."""
-        return username == self.username and check_password_hash(
-            self.password, password
-        )
+        return username == self.username and password == self.password
 
-    def authenticate(self):
-        """Sends a 401 response that enables basic auth."""
+    def authenticate_basic(self):
+        auth = request.authorization
         return Response(
-            'Could not verify your access level for that URL.\n'
-            'You have to login with proper credentials',
+            'Incorrect username or password.\n'
+            'Expected: user | password\n'
+            f'Received: {auth.username} | {auth.password}',
             401,
             {'WWW-Authenticate': 'Basic realm="Login Required"'},
+        )
+
+    def check_jwt(self, token):
+        try:
+            data = jwt.decode(token, self.secret_key, algorithms=["HS256"])
+            return data['user'] == self.username
+        except jwt.ExpiredSignatureError:
+            return False
+        except jwt.InvalidTokenError:
+            return False
+
+    def authenticate_jwt(self):
+        return make_response(
+            'Token is missing or invalid!',
+            401,
+            {'WWW-Authenticate': 'Bearer realm="Login Required"'},
         )
 
     def stop(self):

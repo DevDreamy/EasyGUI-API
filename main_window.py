@@ -43,33 +43,19 @@ class MainWindow(QWidget):
         self.layout.addWidget(self.auth_option_label)
 
         self.auth_option_combo = QComboBox()
-        self.auth_option_combo.addItems(['None', 'Basic Auth'])
-        self.auth_option_combo.currentIndexChanged.connect(
-            self.update_auth_fields
-        )
+        self.auth_option_combo.addItems(['None', 'Basic Auth', 'JWT Bearer Auth'])
+        self.auth_option_combo.currentIndexChanged.connect(self.update_auth_fields)
         self.layout.addWidget(self.auth_option_combo)
 
-        self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText('Username')
-        self.username_input.setVisible(False)
-        self.layout.addWidget(self.username_input)
-
-        self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText('Password')
-        self.password_input.setVisible(False)
-        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.layout.addWidget(self.password_input)
+        self.auth_info_label = QLabel('')
+        self.layout.addWidget(self.auth_info_label)
 
         self.json_option_label = QLabel('JSON Option:')
         self.layout.addWidget(self.json_option_label)
 
         self.json_option_combo = QComboBox()
-        self.json_option_combo.addItems(
-            ['Use default JSON', 'Write your own JSON']
-        )
-        self.json_option_combo.currentIndexChanged.connect(
-            self.update_json_fields
-        )
+        self.json_option_combo.addItems(['Use default JSON', 'Write your own JSON'])
+        self.json_option_combo.currentIndexChanged.connect(self.update_json_fields)
         self.layout.addWidget(self.json_option_combo)
 
         self.json_input = QTextEdit()
@@ -125,14 +111,14 @@ class MainWindow(QWidget):
 
     def update_auth_fields(self):
         self.auth_type = self.auth_option_combo.currentText()
-        if self.auth_type == 'Basic Auth':
-            self.username_input.setVisible(True)
-            self.password_input.setVisible(True)
-            self.username_input.setDisabled(self.server_running)
-            self.password_input.setDisabled(self.server_running)
+        if self.auth_type == 'JWT Auth':
+            self.auth_info_label.setText(
+                'Login URL: localhost:4000/login\nUsername: user\nPassword: password'
+            )
+        elif self.auth_type == 'Basic Auth':
+            self.auth_info_label.setText('Username: user\nPassword: password')
         else:
-            self.username_input.setVisible(False)
-            self.password_input.setVisible(False)
+            self.auth_info_label.setText('')
 
     def update_status_indicator(self):
         if self.json_enabled:
@@ -149,24 +135,7 @@ class MainWindow(QWidget):
     def toggle_server(self):
         if not self.json_enabled:
             try:
-                if self.auth_type == 'Basic Auth':
-                    username = self.username_input.text()
-                    password = self.password_input.text()
-                    if not username or not password:
-                        QMessageBox.critical(
-                            self,
-                            'Error',
-                            'Username and password must be defined for Basic Auth!',
-                        )
-                        return
-                else:
-                    username = ''
-                    password = ''
-
-                if (
-                    self.json_option_combo.currentText()
-                    == 'Write your own JSON'
-                ):
+                if self.json_option_combo.currentText() == 'Write your own JSON':
                     self.custom_json = self.json_input.toPlainText()
                     json_data = json.loads(self.custom_json)
                 else:
@@ -182,9 +151,7 @@ class MainWindow(QWidget):
                     if self.port_input.text().isdigit()
                     else 4000
                 )
-                self.flask_thread.update_auth(
-                    self.auth_type, username, password
-                )
+                self.flask_thread.update_auth(self.auth_type)
                 self.flask_thread.start()
                 self.url_label.setText(
                     f'URL: http://localhost:{self.flask_thread.port}'
@@ -216,3 +183,13 @@ class MainWindow(QWidget):
             self.update_json_fields()
             self.update_auth_fields()
             self.update_status_indicator()
+
+
+import sys
+from PyQt6.QtWidgets import QApplication
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
