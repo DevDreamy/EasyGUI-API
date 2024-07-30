@@ -41,10 +41,10 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.initUI()
-
-        self.flask_thread = FlaskThread()
         self.json_enabled = False
+        self.flask_thread = FlaskThread()
+
+        self.initUI()
 
     def initUI(self):
         self.setWindowTitle('JSON Server')
@@ -83,15 +83,16 @@ class MainWindow(QWidget):
         self.update_json_fields()
 
     def update_json_fields(self):
-        json_option = self.json_option_combo.currentText()
-        if json_option == 'Use default JSON':
-            self.json_input.setDisabled(True)
-            self.json_input.setText(
-                json.dumps({'message': 'This is the default JSON response'})
-            )
-        else:
-            self.json_input.setDisabled(False)
-            self.json_input.setText('')
+        if not self.json_enabled:
+            json_option = self.json_option_combo.currentText()
+            if json_option == 'Use default JSON':
+                self.json_input.setDisabled(True)
+                self.json_input.setText(
+                    json.dumps({'message': 'This is the default JSON response'})
+                )
+            else:
+                self.json_input.setDisabled(False)
+                self.json_input.setText('')
 
     def toggle_server(self):
         if not self.json_enabled:
@@ -108,14 +109,21 @@ class MainWindow(QWidget):
                 self.url_label.setText(f'URL: http://localhost:{port}')
                 self.toggle_button.setText('Disable')
                 self.json_enabled = True
+
+                self.port_input.setDisabled(True)
+                self.json_option_combo.setDisabled(True)
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
         else:
-            # Restart the thread to update the JSON data and stop the server
             self.flask_thread.terminate()
             self.flask_thread = FlaskThread()
             self.toggle_button.setText('Enable')
             self.json_enabled = False
+
+            self.port_input.setDisabled(False)
+            self.json_option_combo.setDisabled(False)
+
+            self.update_json_fields()
 
 
 if __name__ == '__main__':
