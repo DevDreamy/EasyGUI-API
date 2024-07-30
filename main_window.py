@@ -183,13 +183,3 @@ class MainWindow(QWidget):
             self.update_json_fields()
             self.update_auth_fields()
             self.update_status_indicator()
-
-
-import sys
-from PyQt6.QtWidgets import QApplication
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
