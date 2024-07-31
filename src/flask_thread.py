@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request, Response, make_response
 from werkzeug.serving import make_server
 import datetime
 import jwt
-
+from .config import DEFAULT_PORT, DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_SECRET_KEY
 
 class FlaskThread(QThread):
     finished = pyqtSignal()
@@ -11,11 +11,11 @@ class FlaskThread(QThread):
     def __init__(self):
         super().__init__()
         self.json_data = {}
-        self.port = 4000
+        self.port = DEFAULT_PORT
         self.auth_type = 'None'
-        self.username = 'user'
-        self.password = 'password'
-        self.secret_key = 'secret_key'
+        self.username = DEFAULT_USERNAME
+        self.password = DEFAULT_PASSWORD
+        self.secret_key = DEFAULT_SECRET_KEY
         self._server = None
         self._app = Flask(__name__)
 
