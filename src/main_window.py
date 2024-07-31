@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QFormLayout,
     QSpacerItem,
-    QSizePolicy
+    QSizePolicy,
 )
 from PyQt6.QtCore import Qt
 from .flask_thread import FlaskThread
@@ -17,6 +17,7 @@ from .ui_elements.json_input import JsonInput
 from .ui_elements.port_input import PortInput
 from .ui_elements.status_indicator import StatusIndicator
 from .ui_elements.auth_info import AuthInfo
+
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -40,10 +41,14 @@ class MainWindow(QWidget):
         self.layout.addLayout(self.form_layout)
 
         self.url_label = QLabel()
-        self.url_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.url_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
         self.form_layout.addRow(self.url_label)
 
-        spacer1 = QSpacerItem(0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        spacer1 = QSpacerItem(
+            0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
         spacer_layout1 = QVBoxLayout()
         spacer_layout1.addItem(spacer1)
         self.form_layout.addRow('', spacer_layout1)
@@ -56,14 +61,20 @@ class MainWindow(QWidget):
         self.form_layout.addRow(self.auth_option_label)
 
         self.auth_option_combo = QComboBox()
-        self.auth_option_combo.addItems(['None', 'Basic Auth', 'JWT Bearer Auth'])
-        self.auth_option_combo.currentIndexChanged.connect(self.update_auth_fields)
+        self.auth_option_combo.addItems(
+            ['None', 'Basic Auth', 'JWT Bearer Auth']
+        )
+        self.auth_option_combo.currentIndexChanged.connect(
+            self.update_auth_fields
+        )
         self.form_layout.addRow(self.auth_option_combo)
 
         self.auth_info = AuthInfo()
         self.form_layout.addRow(self.auth_info)
 
-        spacer2 = QSpacerItem(0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        spacer2 = QSpacerItem(
+            0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
         spacer_layout2 = QVBoxLayout()
         spacer_layout2.addItem(spacer2)
         self.form_layout.addRow('', spacer_layout2)
@@ -72,8 +83,12 @@ class MainWindow(QWidget):
         self.form_layout.addRow(self.json_option_label)
 
         self.json_option_combo = QComboBox()
-        self.json_option_combo.addItems(['Use default JSON', 'Write your own JSON'])
-        self.json_option_combo.currentIndexChanged.connect(self.update_json_fields)
+        self.json_option_combo.addItems(
+            ['Use default JSON', 'Write your own JSON']
+        )
+        self.json_option_combo.currentIndexChanged.connect(
+            self.update_json_fields
+        )
         self.form_layout.addRow(self.json_option_combo)
 
         self.json_input = JsonInput()
@@ -85,9 +100,7 @@ class MainWindow(QWidget):
 
         self.toggle_button = QPushButton('Start Server')
         self.toggle_button.setFixedSize(200, 40)
-        self.toggle_button.setStyleSheet(
-            "font-size: 16px; padding: 10px;"
-        )
+        self.toggle_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.toggle_button.clicked.connect(self.toggle_server)
         self.button_layout.addWidget(self.toggle_button)
 
@@ -128,10 +141,7 @@ class MainWindow(QWidget):
                 f'Password: password'
             )
         elif self.auth_type == 'Basic Auth':
-            self.auth_info.set_text(
-                f'Username: user\n'
-                f'Password: password'
-            )
+            self.auth_info.set_text('Username: user\n' 'Password: password')
         else:
             self.auth_info.clear()
 
@@ -152,7 +162,10 @@ class MainWindow(QWidget):
     def toggle_server(self):
         if not self.json_enabled:
             try:
-                if self.json_option_combo.currentText() == 'Write your own JSON':
+                if (
+                    self.json_option_combo.currentText()
+                    == 'Write your own JSON'
+                ):
                     self.custom_json = self.json_input.toPlainText()
                     json_data = json.loads(self.custom_json)
                 else:

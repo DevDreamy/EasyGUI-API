@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtCore import Qt
 
+
 class StatusIndicator(QLabel):
     def __init__(self):
         super().__init__()
@@ -18,11 +19,22 @@ class StatusIndicator(QLabel):
     def set_active(self):
         self.setText('Active')
         self.setStyleSheet(
-            'background-color: green; color: white; border-radius: 15px; padding: 3px; text-align: center; font-weight: bold;'
+            'background-color: green;'
+            'color: white;'
+            'border-radius: 15px;'
+            'padding: 3px;'
+            'text-align: center;'
+            'font-weight: bold;'
         )
 
     def set_inactive(self):
         self.setText('Inactive')
         self.setStyleSheet(
-            'background-color: red; color: white; border-radius: 15px; padding: 3px; text-align: center; font-weight: bold;'
+            'background-color: red;'
+            'color: white;'
+            'border-radius: 15px;'
+            'padding: 3px;'
+            'text-align:'
+            'center;'
+            'font-weight: bold;'
         )

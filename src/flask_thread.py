@@ -3,7 +3,13 @@ from flask import Flask, jsonify, request, Response, make_response
 from werkzeug.serving import make_server
 import datetime
 import jwt
-from .config import DEFAULT_PORT, DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_SECRET_KEY
+from .config import (
+    DEFAULT_PORT,
+    DEFAULT_USERNAME,
+    DEFAULT_PASSWORD,
+    DEFAULT_SECRET_KEY,
+)
+
 
 class FlaskThread(QThread):
     finished = pyqtSignal()
@@ -23,7 +29,9 @@ class FlaskThread(QThread):
         def jsonResponse():
             if self.auth_type == 'Basic Auth':
                 auth = request.authorization
-                if not auth or not self.check_auth(auth.username, auth.password):
+                if not auth or not self.check_auth(
+                    auth.username, auth.password
+                ):
                     return self.authenticate_basic()
             elif self.auth_type == 'JWT Auth':
                 auth_header = request.headers.get('Authorization')
