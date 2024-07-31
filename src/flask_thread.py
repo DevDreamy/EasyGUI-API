@@ -33,7 +33,7 @@ class FlaskThread(QThread):
                     auth.username, auth.password
                 ):
                     return self.authenticate_basic()
-            elif self.auth_type == 'JWT Auth':
+            elif self.auth_type == 'JWT Bearer Auth':
                 auth_header = request.headers.get('Authorization')
                 if auth_header and auth_header.startswith('Bearer '):
                     token = auth_header.split(' ')[1]
