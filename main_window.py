@@ -29,12 +29,16 @@ class MainWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Easy GUI API')
-        self.resize(400, 400)
+        self.resize(400, 600)
 
         self.layout = QVBoxLayout()
 
         self.url_label = QLabel()
         self.layout.addWidget(self.url_label)
+
+        self.space_label = QLabel()
+        self.space_label.setFixedHeight(10)
+        self.layout.addWidget(self.space_label)
 
         self.port_input = QLineEdit()
         self.port_input.setPlaceholderText('Enter port (default is 4000)')
@@ -53,7 +57,11 @@ class MainWindow(QWidget):
         self.auth_info_label = QLabel('')
         self.layout.addWidget(self.auth_info_label)
 
-        self.json_option_label = QLabel('JSON Option:')
+        self.space_label2 = QLabel()
+        self.space_label2.setFixedHeight(20)
+        self.layout.addWidget(self.space_label2)
+
+        self.json_option_label = QLabel('Response JSON Option:')
         self.layout.addWidget(self.json_option_label)
 
         self.json_option_combo = QComboBox()
