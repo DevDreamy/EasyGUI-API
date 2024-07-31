@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.iss
+dist/
+build/
+*.spec
