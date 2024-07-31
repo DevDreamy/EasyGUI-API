@@ -9,3 +9,5 @@ GRANT_TYPE = 'client_credentials'
 DEFAULT_EXPIRATION_TIME = 30  # In minutes
 DEFAULT_API_KEY = 'api_key_example'
 DEFAULT_REALM = 'Login Required'
+DIGEST_ALGORITHM = 'MD5'
+DIGEST_QOP = 'auth'
