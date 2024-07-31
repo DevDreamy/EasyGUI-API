@@ -8,3 +8,4 @@ DEFAULT_CLIENT_SECRET = 'client_secret_example'
 GRANT_TYPE = 'client_credentials'
 DEFAULT_EXPIRATION_TIME = 30  # In minutes
 DEFAULT_API_KEY = 'api_key_example'
+DEFAULT_REALM = 'Login Required'

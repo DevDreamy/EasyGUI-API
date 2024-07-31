@@ -1,8 +1,11 @@
 from PyQt6.QtCore import QThread, pyqtSignal
 from flask import Flask, jsonify, request, Response
 from werkzeug.serving import make_server
+from werkzeug.http import parse_dict_header
+from hashlib import md5
 import datetime
 import jwt
+import os
 from .config import (
     DEFAULT_PORT,
     DEFAULT_USERNAME,
@@ -13,6 +16,7 @@ from .config import (
     GRANT_TYPE,
     DEFAULT_EXPIRATION_TIME,
     DEFAULT_API_KEY,
+    DEFAULT_REALM,
 )
 
 
@@ -32,6 +36,7 @@ class BaseFlaskServer(QThread):
         self.grant_type = GRANT_TYPE
         self.expiration_time = DEFAULT_EXPIRATION_TIME
         self.api_key = DEFAULT_API_KEY
+        self.realm = DEFAULT_REALM
         self._server = None
         self._app = Flask(__name__)
 
@@ -294,3 +299,54 @@ class ApiKeyAuthServer(BaseFlaskServer):
             if api_key_header == self.api_key:
                 return jsonify(self.json_data)
             return self.error_401('Invalid or missing API key.')
+
+
+class DigestAuthServer(BaseFlaskServer):
+    def __init__(self, port):
+        super().__init__(port)
+        self.realm = 'Login Required'
+
+        @self._app.route('/', methods=['GET'])
+        def jsonResponse():
+            auth_header = request.headers.get('Authorization')
+            if auth_header:
+                auth_type, auth_info = auth_header.split(' ', 1)
+                if auth_type.lower() == 'digest':
+                    auth_info_dict = parse_dict_header(auth_info)
+                    if self.check_digest(auth_info_dict):
+                        return jsonify(self.json_data)
+                    else:
+                        return self.error_401_digest_invalid_response()
+            nonce = self.generate_nonce()
+            return self.error_401_digest(self.realm, nonce)
+
+    def generate_nonce(self):
+        return md5(os.urandom(16)).hexdigest()
+
+    def check_digest(self, auth_info_dict):
+        ha1 = md5(
+            f'{self.username}:{self.realm}:{self.password}'.encode()
+        ).hexdigest()
+        ha2 = md5(f'GET:{auth_info_dict["uri"]}'.encode()).hexdigest()
+        valid_response = md5(
+            f'{ha1}:{auth_info_dict["nonce"]}:{auth_info_dict["nc"]}:{auth_info_dict["cnonce"]}:{auth_info_dict["qop"]}:{ha2}'.encode()
+        ).hexdigest()
+        return auth_info_dict['response'] == valid_response
+
+    def error_401_digest(self, realm, nonce):
+        return Response(
+            'Digest authentication required. Please provide valid credentials.',
+            401,
+            {
+                'WWW-Authenticate': f'Digest realm="{realm}", nonce="{nonce}", algorithm="MD5", qop="auth"'
+            },
+        )
+
+    def error_401_digest_invalid_response(self):
+        return Response(
+            'Invalid or expired digest response. Please check your credentials and try again.',
+            401,
+            {
+                'WWW-Authenticate': f'Digest realm="{self.realm}", algorithm="MD5", qop="auth"'
+            },
+        )
