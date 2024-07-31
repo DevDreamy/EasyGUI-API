@@ -180,7 +180,8 @@ class MainWindow(QWidget):
         self.auth_type = self.auth_option_combo.currentText()
         if self.auth_type == 'JWT Bearer Auth':
             self.auth_info.set_text(
-                f'Token URL: http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
+                f'Token URL: '
+                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
                 f'Username: {DEFAULT_USERNAME}\n'
                 f'Password: {DEFAULT_PASSWORD}'
             )
@@ -191,7 +192,8 @@ class MainWindow(QWidget):
             )
         elif self.auth_type == 'OAuth2':
             self.auth_info.set_text(
-                f'Token URL: http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
+                f'Token URL: '
+                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
                 f'client_id: {DEFAULT_CLIENT_ID}\n'
                 f'client_secret: {DEFAULT_CLIENT_SECRET}\n'
                 f'grant_type: {GRANT_TYPE}'
@@ -199,7 +201,13 @@ class MainWindow(QWidget):
         elif self.auth_type == 'API Key':
             self.auth_info.set_text(f'X-API-KEY: {DEFAULT_API_KEY}')
         elif self.auth_type == 'Digest':
-            self.auth_info.set_text(f'X-API-KEY: {DEFAULT_API_KEY}')
+            self.auth_info.set_text(
+                f'Username: {DEFAULT_USERNAME}\n'
+                f'Password: {DEFAULT_PASSWORD}\n'
+                f'Realm: {DEFAULT_REALM}\n'
+                f'Algorithm: {DIGEST_ALGORITHM}\n'
+                f'qop: {DIGEST_QOP}\n'
+            )
         else:
             self.auth_info.clear()
 
