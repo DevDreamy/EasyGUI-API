@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIntValidator
 from flask_thread import FlaskThread
 
 
@@ -32,11 +33,13 @@ class MainWindow(QWidget):
 
         self.layout = QVBoxLayout()
 
-        self.url_label = QLabel('URL:')
+        self.url_label = QLabel()
         self.layout.addWidget(self.url_label)
 
         self.port_input = QLineEdit()
         self.port_input.setPlaceholderText('Enter port (default is 4000)')
+        self.port_input.setValidator(QIntValidator(1, 65535, self))
+        self.port_input.textChanged.connect(self.update_url_label)
         self.layout.addWidget(self.port_input)
 
         self.auth_option_label = QLabel('Authentication Type:')
@@ -93,6 +96,7 @@ class MainWindow(QWidget):
 
         self.update_json_fields()
         self.update_status_indicator()
+        self.update_url_label()
 
     def update_json_fields(self):
         if not self.json_enabled:
@@ -113,12 +117,20 @@ class MainWindow(QWidget):
         self.auth_type = self.auth_option_combo.currentText()
         if self.auth_type == 'JWT Bearer Auth':
             self.auth_info_label.setText(
-                'Login URL: localhost:4000/login\nUsername: user\nPassword: password'
+                f'Login URL: http://localhost:{self.port_input.text() or "4000"}/login\nUsername: user\nPassword: password'
             )
         elif self.auth_type == 'Basic Auth':
-            self.auth_info_label.setText('Username: user\nPassword: password')
+            self.auth_info_label.setText(f'Username: user\nPassword: password')
         else:
             self.auth_info_label.setText('')
+
+    def update_url_label(self):
+        port = self.port_input.text()
+        if port and port.isdigit() and 1 <= int(port) <= 65535:
+            self.url_label.setText(f'URL: http://localhost:{port}')
+        else:
+            self.url_label.setText('URL: http://localhost:4000')
+        self.update_auth_fields()
 
     def update_status_indicator(self):
         if self.json_enabled:
@@ -145,17 +157,22 @@ class MainWindow(QWidget):
                     )
                     json_data = json.loads(self.custom_json)
 
-                self.flask_thread.update_json(json_data)
-                self.flask_thread.update_port(
+                port = (
                     int(self.port_input.text())
                     if self.port_input.text().isdigit()
                     else 4000
                 )
+                if not (1 <= port <= 65535):
+                    QMessageBox.critical(
+                        self, 'Error', 'Port must be between 1 and 65535!'
+                    )
+                    return
+
+                self.flask_thread.update_json(json_data)
+                self.flask_thread.update_port(port)
                 self.flask_thread.update_auth(self.auth_type)
                 self.flask_thread.start()
-                self.url_label.setText(
-                    f'URL: http://localhost:{self.flask_thread.port}'
-                )
+                self.update_url_label()
                 self.toggle_button.setText('Disable')
                 self.json_enabled = True
                 self.server_running = True
@@ -164,7 +181,6 @@ class MainWindow(QWidget):
                 self.json_option_combo.setDisabled(True)
                 self.auth_option_combo.setDisabled(True)
 
-                self.update_auth_fields()
                 self.update_status_indicator()
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
