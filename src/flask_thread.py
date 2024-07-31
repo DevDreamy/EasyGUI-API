@@ -11,6 +11,7 @@ from .config import (
     DEFAULT_CLIENT_ID,
     DEFAULT_CLIENT_SECRET,
     GRANT_TYPE,
+    DEFAULT_EXPIRATION_TIME,
 )
 
 
@@ -28,6 +29,7 @@ class BaseFlaskServer(QThread):
         self.client_id = DEFAULT_CLIENT_ID
         self.client_secret = DEFAULT_CLIENT_SECRET
         self.grant_type = GRANT_TYPE
+        self.expiration_time = DEFAULT_EXPIRATION_TIME
         self._server = None
         self._app = Flask(__name__)
 
@@ -41,6 +43,13 @@ class BaseFlaskServer(QThread):
 
     def update_json(self, new_json):
         self.json_data = new_json
+
+    def error_401(self, message):
+        return Response(
+            message,
+            401,
+            {'WWW-Authenticate': 'Bearer realm="Login Required"'},
+        )
 
 
 class NoAuthServer(BaseFlaskServer):
@@ -83,32 +92,46 @@ class JwtAuthServer(BaseFlaskServer):
         @self._app.route('/', methods=['GET'])
         def jsonResponse():
             auth_header = request.headers.get('Authorization')
+
             if auth_header and auth_header.startswith('Bearer '):
                 token = auth_header.split(' ')[1]
-                if not self.check_jwt(token):
-                    return self.authenticate_jwt()
-            else:
-                return self.authenticate_jwt()
-            return jsonify(self.json_data)
+                if self.check_jwt(token):
+                    return jsonify(self.json_data)
+                else:
+                    return self.error_401('Invalid or expired token.')
+            return self.error_401('Token is missing.')
 
         @self._app.route('/token', methods=['POST'])
         def token():
             auth = request.authorization
+
             if (
                 auth
                 and auth.username == self.username
                 and auth.password == self.password
             ):
+                expiration_time = (
+                    datetime.datetime.utcnow()
+                    + datetime.timedelta(minutes=self.expiration_time)
+                )
                 token = jwt.encode(
                     {
                         'user': auth.username,
-                        'exp': datetime.datetime.utcnow()
-                        + datetime.timedelta(minutes=30),
+                        'exp': expiration_time,
                     },
                     self.secret_key,
                     algorithm="HS256",
                 )
-                return jsonify({'token': token})
+                expires_in = (
+                    expiration_time - datetime.datetime.utcnow()
+                ).total_seconds()
+                return jsonify(
+                    {
+                        'access_token': token,
+                        'token_type': 'bearer',
+                        'expires_in': expires_in,
+                    }
+                )
             return Response(
                 'Incorrect username or password.\n'
                 'Expected: user | password\n'
@@ -116,6 +139,48 @@ class JwtAuthServer(BaseFlaskServer):
                 401,
                 {'WWW-Authenticate': 'Basic realm="Login Required"'},
             )
+
+        @self._app.route('/refresh', methods=['POST'])
+        def refresh():
+            auth_header = request.headers.get('Authorization')
+
+            if auth_header and auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+
+                try:
+                    data = jwt.decode(
+                        token,
+                        self.secret_key,
+                        algorithms=["HS256"],
+                        options={"verify_exp": False},
+                    )
+                    new_expiration_time = (
+                        datetime.datetime.utcnow()
+                        + datetime.timedelta(minutes=self.expiration_time)
+                    )
+                    new_token = jwt.encode(
+                        {
+                            'user': data['user'],
+                            'exp': new_expiration_time,
+                        },
+                        self.secret_key,
+                        algorithm="HS256",
+                    )
+                    new_expires_in = (
+                        new_expiration_time - datetime.datetime.utcnow()
+                    ).total_seconds()
+                    return jsonify(
+                        {
+                            'access_token': new_token,
+                            'token_type': 'bearer',
+                            'expires_in': new_expires_in,
+                        }
+                    )
+                except jwt.ExpiredSignatureError:
+                    return self.error_401('Token has expired.')
+                except jwt.InvalidTokenError:
+                    return self.error_401('Invalid token.')
+            return self.error_401('Token is missing.')
 
     def check_jwt(self, token):
         try:
@@ -125,13 +190,6 @@ class JwtAuthServer(BaseFlaskServer):
             return False
         except jwt.InvalidTokenError:
             return False
-
-    def authenticate_jwt(self):
-        return Response(
-            'Token is missing or invalid!',
-            401,
-            {'WWW-Authenticate': 'Bearer realm="Login Required"'},
-        )
 
 
 class OAuth2Server(BaseFlaskServer):
@@ -144,34 +202,75 @@ class OAuth2Server(BaseFlaskServer):
             client_secret = request.form.get('client_secret')
             grant_type = request.form.get('grant_type')
 
-            if grant_type == GRANT_TYPE:
+            if grant_type == self.grant_type:
                 if (
                     client_id == self.client_id
                     and client_secret == self.client_secret
                 ):
+                    expiration_time = (
+                        datetime.datetime.utcnow()
+                        + datetime.timedelta(minutes=self.expiration_time)
+                    )
                     token = jwt.encode(
                         {
                             'client_id': client_id,
-                            'exp': datetime.datetime.utcnow()
-                            + datetime.timedelta(minutes=30),
+                            'exp': expiration_time,
                         },
                         self.secret_key,
                         algorithm="HS256",
                     )
-                    return jsonify({'access_token': token})
+                    expires_in = (
+                        expiration_time - datetime.datetime.utcnow()
+                    ).total_seconds()
+                    return jsonify(
+                        {
+                            'access_token': token,
+                            'token_type': 'bearer',
+                            'expires_in': expires_in,
+                        }
+                    )
                 return Response('Invalid client ID or secret.', 401)
             return Response('Unsupported grant type.', 400)
 
-        @self._app.route('/', methods=['GET'])
-        def jsonResponse():
+        @self._app.route('/refresh', methods=['POST'])
+        def refresh():
             auth_header = request.headers.get('Authorization')
             if auth_header and auth_header.startswith('Bearer '):
                 token = auth_header.split(' ')[1]
-                if not self.check_oauth2(token):
-                    return self.authenticate_oauth2()
-            else:
-                return self.authenticate_oauth2()
-            return jsonify(self.json_data)
+                try:
+                    data = jwt.decode(
+                        token,
+                        self.secret_key,
+                        algorithms=["HS256"],
+                        options={"verify_exp": False},
+                    )
+                    new_expiration_time = (
+                        datetime.datetime.utcnow()
+                        + datetime.timedelta(minutes=self.expiration_time)
+                    )
+                    new_token = jwt.encode(
+                        {
+                            'client_id': data['client_id'],
+                            'exp': new_expiration_time,
+                        },
+                        self.secret_key,
+                        algorithm="HS256",
+                    )
+                    new_expires_in = (
+                        new_expiration_time - datetime.datetime.utcnow()
+                    ).total_seconds()
+                    return jsonify(
+                        {
+                            'access_token': new_token,
+                            'token_type': 'bearer',
+                            'expires_in': new_expires_in,
+                        }
+                    )
+                except jwt.ExpiredSignatureError:
+                    return self.error_401('Token has expired.')
+                except jwt.InvalidTokenError:
+                    return self.error_401('Invalid token.')
+            return self.error_401('Token is missing.')
 
     def check_oauth2(self, token):
         try:
@@ -181,10 +280,3 @@ class OAuth2Server(BaseFlaskServer):
             return False
         except jwt.InvalidTokenError:
             return False
-
-    def authenticate_oauth2(self):
-        return Response(
-            'Token is missing or invalid!',
-            401,
-            {'WWW-Authenticate': 'Bearer realm="Login Required"'},
-        )
