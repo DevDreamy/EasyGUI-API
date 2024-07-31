@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 from PyQt6.QtCore import Qt
-from .flask_thread import (
+from .auth_servers import (
     BasicAuthServer,
     JwtAuthServer,
     NoAuthServer,
@@ -21,10 +21,7 @@ from .flask_thread import (
     ApiKeyAuthServer,
     DigestAuthServer,
 )
-from .ui_elements.json_input import JsonInput
-from .ui_elements.port_input import PortInput
-from .ui_elements.status_indicator import StatusIndicator
-from .ui_elements.auth_info import AuthInfo
+from .ui_elements import AuthInfo, JsonInput, PortInput, StatusIndicator
 from .config import (
     DEFAULT_USERNAME,
     DEFAULT_PASSWORD,
@@ -33,6 +30,9 @@ from .config import (
     DEFAULT_CLIENT_SECRET,
     GRANT_TYPE,
     DEFAULT_API_KEY,
+    DEFAULT_REALM,
+    DIGEST_ALGORITHM,
+    DIGEST_QOP,
 )
 
 
