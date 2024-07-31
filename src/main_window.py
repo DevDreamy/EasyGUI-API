@@ -13,11 +13,24 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 from PyQt6.QtCore import Qt
-from .flask_thread import BasicAuthServer, JwtAuthServer, NoAuthServer
+from .flask_thread import (
+    BasicAuthServer,
+    JwtAuthServer,
+    NoAuthServer,
+    OAuth2Server,
+)
 from .ui_elements.json_input import JsonInput
 from .ui_elements.port_input import PortInput
 from .ui_elements.status_indicator import StatusIndicator
 from .ui_elements.auth_info import AuthInfo
+from .config import (
+    DEFAULT_USERNAME,
+    DEFAULT_PASSWORD,
+    DEFAULT_JSON_RESPONSE,
+    DEFAULT_CLIENT_ID,
+    DEFAULT_CLIENT_SECRET,
+    GRANT_TYPE,
+)
 
 
 class MainWindow(QWidget):
@@ -63,7 +76,7 @@ class MainWindow(QWidget):
 
         self.auth_option_combo = QComboBox()
         self.auth_option_combo.addItems(
-            ['None', 'Basic Auth', 'JWT Bearer Auth']
+            ['None', 'Basic Auth', 'JWT Bearer Auth', 'OAuth2']
         )
         self.auth_option_combo.currentIndexChanged.connect(
             self.update_auth_fields
@@ -145,7 +158,7 @@ class MainWindow(QWidget):
                 self.json_input.setDisabled(True)
                 self.json_input.setText(
                     json.dumps(
-                        {'message': 'This is the default JSON response'},
+                        DEFAULT_JSON_RESPONSE,
                         indent=4,
                     )
                 )
@@ -157,12 +170,22 @@ class MainWindow(QWidget):
         self.auth_type = self.auth_option_combo.currentText()
         if self.auth_type == 'JWT Bearer Auth':
             self.auth_info.set_text(
-                f'Login URL: http://localhost:{self.port_input.text() or "4000"}/login\n'
-                f'Username: user\n'
-                f'Password: password'
+                f'Token URL: http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
+                f'Username: {DEFAULT_USERNAME}\n'
+                f'Password: {DEFAULT_PASSWORD}'
             )
         elif self.auth_type == 'Basic Auth':
-            self.auth_info.set_text('Username: user\n' 'Password: password')
+            self.auth_info.set_text(
+                f'Username: {DEFAULT_USERNAME}\n'
+                f'Password: {DEFAULT_PASSWORD}'
+            )
+        elif self.auth_type == 'OAuth2':
+            self.auth_info.set_text(
+                f'Token URL: http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
+                f'client_id: {DEFAULT_CLIENT_ID}\n'
+                f'client_secret: {DEFAULT_CLIENT_SECRET}\n'
+                f'grant_type: {GRANT_TYPE}'
+            )
         else:
             self.auth_info.clear()
 
@@ -212,6 +235,8 @@ class MainWindow(QWidget):
                     self.server_instance = BasicAuthServer(port=port)
                 elif self.auth_type == 'JWT Bearer Auth':
                     self.server_instance = JwtAuthServer(port=port)
+                elif self.auth_type == 'OAuth2':
+                    self.server_instance = OAuth2Server(port=port)
                 else:
                     self.server_instance = NoAuthServer(port=port)
 
