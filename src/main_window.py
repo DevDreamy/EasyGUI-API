@@ -13,7 +13,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 from PyQt6.QtCore import Qt
-from .flask_thread import FlaskThread
+from .flask_thread import BasicAuthServer, JwtAuthServer, NoAuthServer
 from .ui_elements.json_input import JsonInput
 from .ui_elements.port_input import PortInput
 from .ui_elements.status_indicator import StatusIndicator
@@ -25,7 +25,7 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.json_enabled = False
-        self.flask_thread = FlaskThread()
+        self.server_instance = None
         self.custom_json = ''
         self.auth_type = 'None'
         self.server_running = False
@@ -183,6 +183,10 @@ class MainWindow(QWidget):
     def toggle_server(self):
         if not self.json_enabled:
             try:
+                if self.server_instance:
+                    self.server_instance.stop()
+                    self.server_instance = None
+
                 if self.json_option_custom.isChecked():
                     self.custom_json = self.json_input.toPlainText()
                     json_data = json.loads(self.custom_json)
@@ -204,10 +208,15 @@ class MainWindow(QWidget):
                     )
                     return
 
-                self.flask_thread.update_json(json_data)
-                self.flask_thread.update_port(port)
-                self.flask_thread.update_auth(self.auth_type)
-                self.flask_thread.start()
+                if self.auth_type == 'Basic Auth':
+                    self.server_instance = BasicAuthServer(port=port)
+                elif self.auth_type == 'JWT Bearer Auth':
+                    self.server_instance = JwtAuthServer(port=port)
+                else:
+                    self.server_instance = NoAuthServer(port=port)
+
+                self.server_instance.update_json(json_data)
+                self.server_instance.start()
                 self.update_url_label()
                 self.toggle_button.setText('Stop Server')
                 self.json_enabled = True
@@ -221,9 +230,11 @@ class MainWindow(QWidget):
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
         else:
-            self.flask_thread.stop()
-            self.flask_thread.wait()
-            self.flask_thread = FlaskThread()
+            if self.server_instance:
+                self.server_instance.stop()
+                self.server_instance.wait()
+                self.server_instance = None
+
             self.toggle_button.setText('Start Server')
             self.json_enabled = False
             self.server_running = False
