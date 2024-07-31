@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QMessageBox,
+    QCheckBox,
     QComboBox,
     QFormLayout,
     QSpacerItem,
@@ -82,14 +83,17 @@ class MainWindow(QWidget):
         self.json_option_label = QLabel('Response JSON Option:')
         self.form_layout.addRow(self.json_option_label)
 
-        self.json_option_combo = QComboBox()
-        self.json_option_combo.addItems(
-            ['Use default JSON', 'Write your own JSON']
-        )
-        self.json_option_combo.currentIndexChanged.connect(
-            self.update_json_fields
-        )
-        self.form_layout.addRow(self.json_option_combo)
+        self.json_option_default = QCheckBox('Use default JSON')
+        self.json_option_custom = QCheckBox('Write your own JSON')
+        self.json_option_default.setChecked(True)
+
+        self.json_option_default.toggled.connect(self.handle_json_selection)
+        self.json_option_custom.toggled.connect(self.handle_json_selection)
+
+        json_layout = QVBoxLayout()
+        json_layout.addWidget(self.json_option_default)
+        json_layout.addWidget(self.json_option_custom)
+        self.form_layout.addRow(json_layout)
 
         self.json_input = JsonInput()
         self.form_layout.addRow(self.json_input)
@@ -117,10 +121,27 @@ class MainWindow(QWidget):
         self.update_status_indicator()
         self.update_url_label()
 
+    def handle_json_selection(self):
+        if (
+            self.sender() == self.json_option_default
+            and self.json_option_default.isChecked()
+        ):
+            self.json_option_custom.setChecked(False)
+        elif (
+            self.sender() == self.json_option_custom
+            and self.json_option_custom.isChecked()
+        ):
+            self.json_option_default.setChecked(False)
+        if (
+            not self.json_option_default.isChecked()
+            and not self.json_option_custom.isChecked()
+        ):
+            self.sender().setChecked(True)
+        self.update_json_fields()
+
     def update_json_fields(self):
         if not self.json_enabled:
-            json_option = self.json_option_combo.currentText()
-            if json_option == 'Use default JSON':
+            if self.json_option_default.isChecked():
                 self.json_input.setDisabled(True)
                 self.json_input.setText(
                     json.dumps(
@@ -162,10 +183,7 @@ class MainWindow(QWidget):
     def toggle_server(self):
         if not self.json_enabled:
             try:
-                if (
-                    self.json_option_combo.currentText()
-                    == 'Write your own JSON'
-                ):
+                if self.json_option_custom.isChecked():
                     self.custom_json = self.json_input.toPlainText()
                     json_data = json.loads(self.custom_json)
                 else:
@@ -196,9 +214,9 @@ class MainWindow(QWidget):
                 self.server_running = True
 
                 self.port_input.setDisabled(True)
-                self.json_option_combo.setDisabled(True)
+                self.json_option_default.setDisabled(True)
+                self.json_option_custom.setDisabled(True)
                 self.auth_option_combo.setDisabled(True)
-
                 self.update_status_indicator()
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
@@ -211,7 +229,8 @@ class MainWindow(QWidget):
             self.server_running = False
 
             self.port_input.setDisabled(False)
-            self.json_option_combo.setDisabled(False)
+            self.json_option_default.setDisabled(False)
+            self.json_option_custom.setDisabled(False)
             self.auth_option_combo.setDisabled(False)
 
             self.update_json_fields()
