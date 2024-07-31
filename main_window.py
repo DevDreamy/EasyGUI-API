@@ -34,6 +34,7 @@ class MainWindow(QWidget):
         self.layout = QVBoxLayout()
 
         self.url_label = QLabel()
+        self.url_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.layout.addWidget(self.url_label)
 
         self.space_label = QLabel()
@@ -55,6 +56,7 @@ class MainWindow(QWidget):
         self.layout.addWidget(self.auth_option_combo)
 
         self.auth_info_label = QLabel('')
+        self.auth_info_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.layout.addWidget(self.auth_info_label)
 
         self.space_label2 = QLabel()
@@ -125,12 +127,20 @@ class MainWindow(QWidget):
         self.auth_type = self.auth_option_combo.currentText()
         if self.auth_type == 'JWT Bearer Auth':
             self.auth_info_label.setText(
-                f'Login URL: http://localhost:{self.port_input.text() or "4000"}/login\nUsername: user\nPassword: password'
+                f'Login URL: http://localhost:{self.port_input.text() or "4000"}/login\n'
+                f'Username: user\n'
+                f'Password: password'
             )
+            self.auth_info_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         elif self.auth_type == 'Basic Auth':
-            self.auth_info_label.setText(f'Username: user\nPassword: password')
+            self.auth_info_label.setText(
+                f'Username: user\n'
+                f'Password: password'
+            )
+            self.auth_info_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         else:
             self.auth_info_label.setText('')
+            self.auth_info_label.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
 
     def update_url_label(self):
         port = self.port_input.text()
