@@ -18,6 +18,7 @@ from .flask_thread import (
     JwtAuthServer,
     NoAuthServer,
     OAuth2Server,
+    ApiKeyAuthServer,
 )
 from .ui_elements.json_input import JsonInput
 from .ui_elements.port_input import PortInput
@@ -30,6 +31,7 @@ from .config import (
     DEFAULT_CLIENT_ID,
     DEFAULT_CLIENT_SECRET,
     GRANT_TYPE,
+    DEFAULT_API_KEY,
 )
 
 
@@ -76,7 +78,7 @@ class MainWindow(QWidget):
 
         self.auth_option_combo = QComboBox()
         self.auth_option_combo.addItems(
-            ['None', 'Basic Auth', 'JWT Bearer Auth', 'OAuth2']
+            ['None', 'Basic Auth', 'JWT Bearer Auth', 'OAuth2', 'API Key']
         )
         self.auth_option_combo.currentIndexChanged.connect(
             self.update_auth_fields
@@ -186,6 +188,8 @@ class MainWindow(QWidget):
                 f'client_secret: {DEFAULT_CLIENT_SECRET}\n'
                 f'grant_type: {GRANT_TYPE}'
             )
+        elif self.auth_type == 'API Key':
+            self.auth_info.set_text(f'X-API-KEY: {DEFAULT_API_KEY}')
         else:
             self.auth_info.clear()
 
@@ -237,6 +241,8 @@ class MainWindow(QWidget):
                     self.server_instance = JwtAuthServer(port=port)
                 elif self.auth_type == 'OAuth2':
                     self.server_instance = OAuth2Server(port=port)
+                elif self.auth_type == 'API Key':
+                    self.server_instance = ApiKeyAuthServer(port=port)
                 else:
                     self.server_instance = NoAuthServer(port=port)
 
