@@ -12,8 +12,11 @@ from PyQt5.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
     QFileDialog,
+    QTextEdit,
+    QLineEdit,
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIntValidator
 from .auth_servers import (
     BasicAuthServer,
     JwtAuthServer,
@@ -22,7 +25,7 @@ from .auth_servers import (
     ApiKeyAuthServer,
     DigestAuthServer,
 )
-from .ui_elements import AuthInfo, JsonInput, PortInput, StatusIndicator
+from .ui_elements import AuthInfo, StatusIndicator
 from .config import (
     DEFAULT_USERNAME,
     DEFAULT_PASSWORD,
@@ -36,12 +39,15 @@ from .config import (
     DIGEST_QOP,
 )
 from .resources.styles import DARK_THEME_QSS
+from .utils import tr
 
 
 class MainWindow(QWidget):
-    def __init__(self):
+    def __init__(self, app, translator):
         super().__init__()
 
+        self.app = app
+        self.translator = translator
         self.json_enabled = False
         self.server_instance = None
         self.custom_json = ''
@@ -59,6 +65,22 @@ class MainWindow(QWidget):
 
         self.layout = QVBoxLayout()
 
+        self.top_bar_layout = QHBoxLayout()
+        self.layout.addLayout(self.top_bar_layout)
+
+        self.language_selector = QComboBox()
+        self.language_selector.addItems(
+            [
+                "English",
+                "Portuguese",
+            ]
+        )
+        self.language_selector.setFixedWidth(80)
+        self.language_selector.currentIndexChanged.connect(self.change_language)
+        self.top_bar_layout.addWidget(
+            self.language_selector, alignment=Qt.AlignmentFlag.AlignRight
+        )
+
         self.form_layout = QFormLayout()
         self.layout.addLayout(self.form_layout)
 
@@ -75,11 +97,13 @@ class MainWindow(QWidget):
         spacer_layout1.addItem(spacer1)
         self.form_layout.addRow('', spacer_layout1)
 
-        self.port_input = PortInput()
+        self.port_input = QLineEdit()
+        self.port_input.setPlaceholderText(tr('Enter port (default is 4000)'))
+        self.port_input.setValidator(QIntValidator(1, 65535))
         self.port_input.textChanged.connect(self.update_url_label)
         self.form_layout.addRow('Port:', self.port_input)
 
-        self.auth_option_label = QLabel('Authentication Type:')
+        self.auth_option_label = QLabel(tr('Authentication Type:'))
         self.form_layout.addRow(self.auth_option_label)
 
         self.auth_option_combo = QComboBox()
@@ -108,11 +132,11 @@ class MainWindow(QWidget):
         spacer_layout2.addItem(spacer2)
         self.form_layout.addRow('', spacer_layout2)
 
-        self.json_option_label = QLabel('JSON Response:')
+        self.json_option_label = QLabel(tr('JSON Response:'))
         self.form_layout.addRow(self.json_option_label)
 
-        self.json_option_default = QCheckBox('Use default JSON')
-        self.json_option_custom = QCheckBox('Write your own JSON')
+        self.json_option_default = QCheckBox(tr('Use default JSON'))
+        self.json_option_custom = QCheckBox(tr('Write your own JSON'))
         self.json_option_default.setChecked(True)
 
         self.json_option_default.toggled.connect(self.handle_json_selection)
@@ -123,19 +147,20 @@ class MainWindow(QWidget):
         json_layout.addWidget(self.json_option_custom)
         self.form_layout.addRow(json_layout)
 
-        self.import_json_button = QPushButton('Import JSON File')
+        self.import_json_button = QPushButton(tr('Import JSON File'))
         self.import_json_button.setFixedSize(100, 20)
         self.import_json_button.clicked.connect(self.import_json)
         self.form_layout.addRow(self.import_json_button)
 
-        self.json_input = JsonInput()
+        self.json_input = QTextEdit()
+        self.json_input.setPlaceholderText(tr('Enter JSON here...'))
         self.form_layout.addRow(self.json_input)
 
         self.button_layout = QHBoxLayout()
         self.button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addLayout(self.button_layout)
 
-        self.toggle_button = QPushButton('Start Server')
+        self.toggle_button = QPushButton(tr('Start Server'))
         self.toggle_button.setFixedSize(200, 40)
         self.toggle_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.toggle_button.clicked.connect(self.toggle_server)
@@ -331,3 +356,35 @@ class MainWindow(QWidget):
                 QMessageBox.critical(
                     self, 'Error', f'Failed to load JSON file: {str(e)}'
                 )
+
+    def change_language(self):
+        current_language = self.language_selector.currentIndex()
+        if current_language == 0:
+            self.translator.load("translations/en_US.qm")
+        elif current_language == 1:
+            self.translator.load("translations/pt_BR.qm")
+        self.app.installTranslator(self.translator)
+        self.retranslateUi()
+
+    def retranslateUi(self):
+        self.port_input.setPlaceholderText(
+            self.tr('Enter port (default is 4000)')
+        )
+        self.auth_option_label.setText(self.tr('Authentication Type:'))
+        self.json_option_label.setText(self.tr('JSON Response:'))
+        self.json_option_default.setText(self.tr('Use default JSON'))
+        self.json_option_custom.setText(self.tr('Write your own JSON'))
+        self.import_json_button.setText(self.tr('Import JSON File'))
+        self.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
+        self.toggle_button.setText(self.tr('Start Server'))
+        self.auth_option_combo.clear()
+        self.auth_option_combo.addItems(
+            [
+                self.tr('None'),
+                self.tr('Basic Auth'),
+                self.tr('JWT Bearer Auth'),
+                self.tr('OAuth2'),
+                self.tr('API Key'),
+                self.tr('Digest'),
+            ]
+        )
