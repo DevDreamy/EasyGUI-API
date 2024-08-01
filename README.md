@@ -2,7 +2,7 @@
     <img src="https://i.imgur.com/ObEsk0c.png" alt="Logo" width="200" />
 </div>
 
-# Easy GUI API
+# EasyGUI API
 
 <img src="https://i.imgur.com/kR7HzAA.png" alt="Logo" width="200" />
 
