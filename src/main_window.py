@@ -1,5 +1,5 @@
 import json
-from PyQt6.QtWidgets import (
+from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QSpacerItem,
     QSizePolicy,
 )
-from PyQt6.QtCore import Qt
+from PyQt5.QtCore import Qt
 from .auth_servers import (
     BasicAuthServer,
     JwtAuthServer,
@@ -35,6 +35,9 @@ from .config import (
     DIGEST_QOP,
 )
 
+def load_stylesheet(filename):
+    with open(filename, 'r') as file:
+        return file.read()
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -51,6 +54,9 @@ class MainWindow(QWidget):
     def initUI(self):
         self.setWindowTitle('Easy GUI API')
         self.resize(400, 600)
+
+        stylesheet = load_stylesheet('resources/dark_theme.qss')
+        self.setStyleSheet(stylesheet)
 
         self.layout = QVBoxLayout()
 

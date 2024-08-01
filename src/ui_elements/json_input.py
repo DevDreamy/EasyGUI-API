@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QTextEdit
+from PyQt5.QtWidgets import QTextEdit
 
 
 class JsonInput(QTextEdit):

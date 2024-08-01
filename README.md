@@ -17,7 +17,7 @@ It aims to support novice programmers by offering an easy-to-use tool for simula
 
 ## Dependencies
 
-- PyQt6
+- PyQt5
 - Flask
 - pyjwt
 

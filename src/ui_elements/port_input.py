@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QLineEdit
-from PyQt6.QtGui import QIntValidator
+from PyQt5.QtWidgets import QLineEdit
+from PyQt5.QtGui import QIntValidator
 
 
 class PortInput(QLineEdit):

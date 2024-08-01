@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal
 from flask import Flask, Response
 from werkzeug.serving import make_server
 from ..config import (
