@@ -1,4 +1,10 @@
+<div align="center">
+    <img src="https://i.imgur.com/ObEsk0c.png" alt="Logo" width="200" />
+</div>
+
 # Easy GUI API
+
+<img src="https://i.imgur.com/kR7HzAA.png" alt="Logo" width="200" />
 
 This is a straightforward Python application that sets up a JSON server with an intuitive interface for configuring response data and authentication methods.
 
