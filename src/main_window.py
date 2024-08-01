@@ -34,10 +34,8 @@ from .config import (
     DIGEST_ALGORITHM,
     DIGEST_QOP,
 )
+from .resources.styles import DARK_THEME_QSS
 
-def load_stylesheet(filename):
-    with open(filename, 'r') as file:
-        return file.read()
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -55,7 +53,7 @@ class MainWindow(QWidget):
         self.setWindowTitle('Easy GUI API')
         self.resize(400, 600)
 
-        stylesheet = load_stylesheet('resources/dark_theme.qss')
+        stylesheet = DARK_THEME_QSS
         self.setStyleSheet(stylesheet)
 
         self.layout = QVBoxLayout()
