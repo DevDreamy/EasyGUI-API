@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
     QFormLayout,
     QSpacerItem,
     QSizePolicy,
+    QFileDialog,
 )
 from PyQt5.QtCore import Qt
 from .auth_servers import (
@@ -50,7 +51,7 @@ class MainWindow(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Easy GUI API')
+        self.setWindowTitle('EasyGUI API')
         self.resize(400, 600)
 
         stylesheet = DARK_THEME_QSS
@@ -107,7 +108,7 @@ class MainWindow(QWidget):
         spacer_layout2.addItem(spacer2)
         self.form_layout.addRow('', spacer_layout2)
 
-        self.json_option_label = QLabel('Response JSON Option:')
+        self.json_option_label = QLabel('JSON Response:')
         self.form_layout.addRow(self.json_option_label)
 
         self.json_option_default = QCheckBox('Use default JSON')
@@ -121,6 +122,11 @@ class MainWindow(QWidget):
         json_layout.addWidget(self.json_option_default)
         json_layout.addWidget(self.json_option_custom)
         self.form_layout.addRow(json_layout)
+
+        self.import_json_button = QPushButton('Import JSON File')
+        self.import_json_button.setFixedSize(100, 20)
+        self.import_json_button.clicked.connect(self.import_json)
+        self.form_layout.addRow(self.import_json_button)
 
         self.json_input = JsonInput()
         self.form_layout.addRow(self.json_input)
@@ -302,3 +308,26 @@ class MainWindow(QWidget):
             self.update_json_fields()
             self.update_auth_fields()
             self.update_status_indicator()
+
+    def import_json(self):
+        options = QFileDialog.Options()
+        file_name, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import JSON File",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+            options=options,
+        )
+        if file_name:
+            try:
+                with open(file_name, 'r') as file:
+                    json_data = json.load(file)
+                    formatted_json = json.dumps(json_data, indent=4)
+                    self.json_input.setText(formatted_json)
+                    self.custom_json = formatted_json
+                    self.json_option_custom.setChecked(True)
+                    self.json_option_default.setChecked(False)
+            except (json.JSONDecodeError, IOError) as e:
+                QMessageBox.critical(
+                    self, 'Error', f'Failed to load JSON file: {str(e)}'
+                )
