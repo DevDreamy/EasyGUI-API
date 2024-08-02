@@ -76,7 +76,7 @@ class MainWindow(QWidget):
         self.language_selector.addItem(QIcon(usa_flag), "English")
         self.language_selector.addItem(QIcon(brazil_flag), "Portuguese")
         self.language_selector.addItem(QIcon(spain_flag), "Spanish")
-        self.language_selector.setFixedWidth(100)
+        self.language_selector.setFixedWidth(120)
         self.language_selector.currentIndexChanged.connect(self.change_language)
         self.top_bar_layout.addWidget(
             self.language_selector, alignment=Qt.AlignmentFlag.AlignRight
@@ -88,7 +88,7 @@ class MainWindow(QWidget):
         self.form_layout = QFormLayout()
 
         spacer1 = QSpacerItem(
-            0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+            0, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
         )
         spacer_layout1 = QVBoxLayout()
         spacer_layout1.addItem(spacer1)
@@ -102,6 +102,13 @@ class MainWindow(QWidget):
         self.port_input.setValidator(QIntValidator(1, 65535))
         self.port_input.textChanged.connect(self.update_url_label)
         self.form_layout.addRow(self.port_label, self.port_input)
+
+        spacer2 = QSpacerItem(
+            0, 5, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
+        spacer_layout2 = QVBoxLayout()
+        spacer_layout2.addItem(spacer2)
+        self.form_layout.addRow('', spacer_layout2)
 
         self.auth_option_label = QLabel(self.tr('Authentication Type:'))
         self.form_layout.addRow(self.auth_option_label)
@@ -157,7 +164,7 @@ class MainWindow(QWidget):
 
         self.toggle_button = QPushButton(self.tr('Start Server'))
         self.toggle_button.setFixedSize(200, 40)
-        self.toggle_button.setStyleSheet("font-size: 16px; padding: 10px;")
+        self.toggle_button.setStyleSheet("font-size: 14px; padding: 8px;")
         self.toggle_button.clicked.connect(self.toggle_server)
         self.button_layout.addWidget(self.toggle_button)
         self.layout.addLayout(self.button_layout)
@@ -371,13 +378,13 @@ class MainWindow(QWidget):
         current_language = self.language_selector.currentText()
         if current_language == 'English':
             self.translator.load("translations/en_US.qm")
-            self.import_json_button.setFixedSize(100, 20)
+            self.import_json_button.setFixedSize(120, 26)
         elif current_language == 'Portuguese':
             self.translator.load("translations/pt_BR.qm")
-            self.import_json_button.setFixedSize(130, 20)
+            self.import_json_button.setFixedSize(150, 26)
         elif current_language == 'Spanish':
             self.translator.load("translations/es_ES.qm")
-            self.import_json_button.setFixedSize(130, 20)
+            self.import_json_button.setFixedSize(150, 26)
         self.app.installTranslator(self.translator)
         self.retranslateUi()
 
