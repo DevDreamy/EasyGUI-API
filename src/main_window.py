@@ -368,8 +368,10 @@ class MainWindow(QWidget):
         current_language = self.language_selector.currentIndex()
         if current_language == 0:
             self.translator.load("translations/en_US.qm")
+            self.import_json_button.setFixedSize(100, 20)
         elif current_language == 1:
             self.translator.load("translations/pt_BR.qm")
+            self.import_json_button.setFixedSize(150, 20)
         self.app.installTranslator(self.translator)
         self.retranslateUi()
 
