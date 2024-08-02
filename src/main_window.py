@@ -64,26 +64,17 @@ class MainWindow(QWidget):
 
         self.layout = QVBoxLayout()
 
+        # Top bar layout
         self.top_bar_layout = QHBoxLayout()
-        self.layout.addLayout(self.top_bar_layout)
-
         self.url_label = QLabel()
         self.url_label.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextSelectableByMouse
         )
         self.top_bar_layout.addWidget(self.url_label)
 
-        spacer = QSpacerItem(
-            40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
-        )
-        self.top_bar_layout.addItem(spacer)
-
         self.language_selector = QComboBox()
         self.language_selector.addItem(QIcon(usa_flag), "English")
-        self.language_selector.addItem(
-            QIcon(brazil_flag),
-            "Portuguese",
-        )
+        self.language_selector.addItem(QIcon(brazil_flag), "Portuguese")
         self.language_selector.addItem(QIcon(spain_flag), "Spanish")
         self.language_selector.setFixedWidth(100)
         self.language_selector.currentIndexChanged.connect(self.change_language)
@@ -91,8 +82,10 @@ class MainWindow(QWidget):
             self.language_selector, alignment=Qt.AlignmentFlag.AlignRight
         )
 
+        self.layout.addLayout(self.top_bar_layout)
+
+        # Form layout
         self.form_layout = QFormLayout()
-        self.layout.addLayout(self.form_layout)
 
         spacer1 = QSpacerItem(
             0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
@@ -162,22 +155,37 @@ class MainWindow(QWidget):
         self.json_input.setPlaceholderText(tr('Enter JSON here...'))
         self.form_layout.addRow(self.json_input)
 
+        self.layout.addLayout(self.form_layout)
+
+        # Server Button
         self.button_layout = QHBoxLayout()
         self.button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addLayout(self.button_layout)
 
         self.toggle_button = QPushButton(tr('Start Server'))
         self.toggle_button.setFixedSize(200, 40)
         self.toggle_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.toggle_button.clicked.connect(self.toggle_server)
         self.button_layout.addWidget(self.toggle_button)
+        self.layout.addLayout(self.button_layout)
+
+        # Bottom Bar
+        self.bottom_bar_layout = QHBoxLayout()
+        self.credits_label = QLabel(
+            '<a'
+            ' style="text-decoration:none;color:#555555;"'
+            ' href="https://github.com/DevDreamy">DevDreamy'
+            '</a>'
+        )
+        self.credits_label.setOpenExternalLinks(True)
+        self.credits_label.setTextFormat(Qt.TextFormat.RichText)
+        self.credits_label.setAlignment(Qt.AlignmentFlag.AlignBottom)
+        self.bottom_bar_layout.addWidget(self.credits_label)
+        self.layout.addLayout(self.bottom_bar_layout)
 
         self.status_layout = QHBoxLayout()
-        self.status_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.layout.addLayout(self.status_layout)
-
         self.status_indicator = StatusIndicator()
         self.status_layout.addWidget(self.status_indicator)
+        self.bottom_bar_layout.addLayout(self.status_layout)
 
         self.setLayout(self.layout)
 
