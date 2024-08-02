@@ -229,33 +229,33 @@ class MainWindow(QWidget):
         self.auth_type = self.auth_option_combo.currentText()
         if self.auth_type == 'JWT Bearer Auth':
             self.auth_info.set_text(
-                f'Token URL: '
-                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
-                f'Username: {DEFAULT_USERNAME}\n'
-                f'Password: {DEFAULT_PASSWORD}'
+                f'<b>Token URL:</b> '
+                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]<br>'
+                f'<b>Username:</b> {DEFAULT_USERNAME}<br>'
+                f'<b>Password:</b> {DEFAULT_PASSWORD}<br>'
             )
         elif self.auth_type == 'Basic Auth':
             self.auth_info.set_text(
-                f'Username: {DEFAULT_USERNAME}\n'
-                f'Password: {DEFAULT_PASSWORD}'
+                f'<b>Username:</b> {DEFAULT_USERNAME}<br>'
+                f'<b>Password:</b> {DEFAULT_PASSWORD}<br>'
             )
         elif self.auth_type == 'OAuth2':
             self.auth_info.set_text(
-                f'Token URL: '
-                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]\n'
-                f'client_id: {DEFAULT_CLIENT_ID}\n'
-                f'client_secret: {DEFAULT_CLIENT_SECRET}\n'
-                f'grant_type: {GRANT_TYPE}'
+                f'<b>Token URL:</b> '
+                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]<br>'
+                f'<b>client_id:</b> {DEFAULT_CLIENT_ID}<br>'
+                f'<b>client_secret:</b> {DEFAULT_CLIENT_SECRET}<br>'
+                f'<b>grant_type:</b> {GRANT_TYPE}<br>'
             )
         elif self.auth_type == 'API Key':
-            self.auth_info.set_text(f'X-API-KEY: {DEFAULT_API_KEY}')
+            self.auth_info.set_text(f'<b>X-API-KEY:</b> {DEFAULT_API_KEY}<br>')
         elif self.auth_type == 'Digest':
             self.auth_info.set_text(
-                f'Username: {DEFAULT_USERNAME}\n'
-                f'Password: {DEFAULT_PASSWORD}\n'
-                f'Realm: {DEFAULT_REALM}\n'
-                f'Algorithm: {DIGEST_ALGORITHM}\n'
-                f'qop: {DIGEST_QOP}\n'
+                f'<b>Username:</b> {DEFAULT_USERNAME}<br>'
+                f'<b>Password:</b> {DEFAULT_PASSWORD}<br>'
+                f'<b>Realm:</b> {DEFAULT_REALM}<br>'
+                f'<b>Algorithm:</b> {DIGEST_ALGORITHM}<br>'
+                f'<b>qop:</b> {DIGEST_QOP}<br>'
             )
         else:
             self.auth_info.clear()
