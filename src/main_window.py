@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import QIntValidator, QIcon
 from .auth_servers import (
     BasicAuthServer,
     JwtAuthServer,
@@ -39,7 +39,7 @@ from .config import (
     DIGEST_QOP,
 )
 from .resources.styles import DARK_THEME_QSS
-from .utils import tr
+from .utils import tr, brazil_flag, usa_flag
 
 
 class MainWindow(QWidget):
@@ -79,13 +79,12 @@ class MainWindow(QWidget):
         self.top_bar_layout.addItem(spacer)
 
         self.language_selector = QComboBox()
-        self.language_selector.addItems(
-            [
-                "English",
-                "Portuguese",
-            ]
+        self.language_selector.addItem(QIcon(usa_flag), "English")
+        self.language_selector.addItem(
+            QIcon(brazil_flag),
+            "Portuguese",
         )
-        self.language_selector.setFixedWidth(80)
+        self.language_selector.setFixedWidth(100)
         self.language_selector.currentIndexChanged.connect(self.change_language)
         self.top_bar_layout.addWidget(
             self.language_selector, alignment=Qt.AlignmentFlag.AlignRight
