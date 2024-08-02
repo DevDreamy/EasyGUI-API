@@ -317,6 +317,7 @@ class MainWindow(QWidget):
                 self.json_option_default.setDisabled(True)
                 self.json_option_custom.setDisabled(True)
                 self.auth_option_combo.setDisabled(True)
+                self.import_json_button.setDisabled(True)
                 self.update_status_indicator()
             except json.JSONDecodeError:
                 QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
@@ -334,6 +335,7 @@ class MainWindow(QWidget):
             self.json_option_default.setDisabled(False)
             self.json_option_custom.setDisabled(False)
             self.auth_option_combo.setDisabled(False)
+            self.import_json_button.setDisabled(False)
 
             self.update_json_fields()
             self.update_auth_fields()
