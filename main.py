@@ -9,7 +9,7 @@ translator = QTranslator()
 
 def main():
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("resources/icons/easy_gui_api_icon.ico"))
+    app.setWindowIcon(QIcon("src/resources/icons/easy_gui_api_icon.ico"))
     translator.load("translations/en_US.qm")
     app.installTranslator(translator)
 
