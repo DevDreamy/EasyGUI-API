@@ -370,7 +370,7 @@ class MainWindow(QWidget):
             self.import_json_button.setFixedSize(100, 20)
         elif current_language == 1:
             self.translator.load("translations/pt_BR.qm")
-            self.import_json_button.setFixedSize(150, 20)
+            self.import_json_button.setFixedSize(130, 20)
         self.app.installTranslator(self.translator)
         self.retranslateUi()
 
