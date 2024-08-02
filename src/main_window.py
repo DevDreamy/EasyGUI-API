@@ -94,26 +94,27 @@ class MainWindow(QWidget):
         spacer_layout1.addItem(spacer1)
         self.form_layout.addRow('', spacer_layout1)
 
-        self.port_label = QLabel()
-        self.port_label.setText(self.tr('Port:'))
+        self.port_label = QLabel(self.tr('Port:'))
         self.port_input = QLineEdit()
-        self.port_input.setPlaceholderText(tr('Enter port (default is 4000)'))
+        self.port_input.setPlaceholderText(
+            self.tr('Enter port (default is 4000)')
+        )
         self.port_input.setValidator(QIntValidator(1, 65535))
         self.port_input.textChanged.connect(self.update_url_label)
         self.form_layout.addRow(self.port_label, self.port_input)
 
-        self.auth_option_label = QLabel(tr('Authentication Type:'))
+        self.auth_option_label = QLabel(self.tr('Authentication Type:'))
         self.form_layout.addRow(self.auth_option_label)
 
         self.auth_option_combo = QComboBox()
         self.auth_option_combo.addItems(
             [
-                'None',
-                'Basic Auth',
-                'JWT Bearer Auth',
-                'OAuth2',
-                'API Key',
-                'Digest',
+                self.tr('None'),
+                self.tr('Basic Auth'),
+                self.tr('JWT Bearer Auth'),
+                self.tr('OAuth2'),
+                self.tr('API Key'),
+                self.tr('Digest'),
             ]
         )
         self.auth_option_combo.currentIndexChanged.connect(
@@ -124,18 +125,11 @@ class MainWindow(QWidget):
         self.auth_info = AuthInfo()
         self.form_layout.addRow(self.auth_info)
 
-        spacer2 = QSpacerItem(
-            0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
-        )
-        spacer_layout2 = QVBoxLayout()
-        spacer_layout2.addItem(spacer2)
-        self.form_layout.addRow('', spacer_layout2)
-
-        self.json_option_label = QLabel(tr('JSON Response:'))
+        self.json_option_label = QLabel(self.tr('JSON Response:'))
         self.form_layout.addRow(self.json_option_label)
 
-        self.json_option_default = QCheckBox(tr('Use default JSON'))
-        self.json_option_custom = QCheckBox(tr('Write your own JSON'))
+        self.json_option_default = QCheckBox(self.tr('Use default JSON'))
+        self.json_option_custom = QCheckBox(self.tr('Write your own JSON'))
         self.json_option_default.setChecked(True)
 
         self.json_option_default.toggled.connect(self.handle_json_selection)
@@ -146,13 +140,13 @@ class MainWindow(QWidget):
         json_layout.addWidget(self.json_option_custom)
         self.form_layout.addRow(json_layout)
 
-        self.import_json_button = QPushButton(tr('Import JSON File'))
-        self.import_json_button.setFixedSize(100, 20)
+        self.import_json_button = QPushButton(self.tr('Import JSON File'))
+        self.import_json_button.setFixedSize(120, 26)
         self.import_json_button.clicked.connect(self.import_json)
         self.form_layout.addRow(self.import_json_button)
 
         self.json_input = QTextEdit()
-        self.json_input.setPlaceholderText(tr('Enter JSON here...'))
+        self.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
         self.form_layout.addRow(self.json_input)
 
         self.layout.addLayout(self.form_layout)
@@ -161,7 +155,7 @@ class MainWindow(QWidget):
         self.button_layout = QHBoxLayout()
         self.button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.toggle_button = QPushButton(tr('Start Server'))
+        self.toggle_button = QPushButton(self.tr('Start Server'))
         self.toggle_button.setFixedSize(200, 40)
         self.toggle_button.setStyleSheet("font-size: 16px; padding: 10px;")
         self.toggle_button.clicked.connect(self.toggle_server)
@@ -271,9 +265,9 @@ class MainWindow(QWidget):
     def update_status_indicator(self):
         if self.server_running:
             self.status_indicator.set_active()
-            self.status_indicator.setText(tr('Active'))
+            self.status_indicator.setText(self.tr('Active'))
         else:
-            self.status_indicator.setText(tr('Inactive'))
+            self.status_indicator.setText(self.tr('Inactive'))
             self.status_indicator.set_inactive()
 
     def toggle_server(self):
@@ -320,7 +314,7 @@ class MainWindow(QWidget):
                 self.server_instance.update_json(json_data)
                 self.server_instance.start()
                 self.update_url_label()
-                self.toggle_button.setText(tr('Stop Server'))
+                self.toggle_button.setText(self.tr('Stop Server'))
                 self.server_running = True
 
                 self.port_input.setDisabled(True)
@@ -337,7 +331,7 @@ class MainWindow(QWidget):
                 self.server_instance.wait()
                 self.server_instance = None
 
-            self.toggle_button.setText(tr('Start Server'))
+            self.toggle_button.setText(self.tr('Start Server'))
             self.server_running = False
 
             self.port_input.setDisabled(False)
