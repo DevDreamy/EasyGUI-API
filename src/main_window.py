@@ -100,11 +100,13 @@ class MainWindow(QWidget):
         spacer_layout1.addItem(spacer1)
         self.form_layout.addRow('', spacer_layout1)
 
+        self.port_label = QLabel()
+        self.port_label.setText(self.tr('Port:'))
         self.port_input = QLineEdit()
         self.port_input.setPlaceholderText(tr('Enter port (default is 4000)'))
         self.port_input.setValidator(QIntValidator(1, 65535))
         self.port_input.textChanged.connect(self.update_url_label)
-        self.form_layout.addRow('Port:', self.port_input)
+        self.form_layout.addRow(self.port_label, self.port_input)
 
         self.auth_option_label = QLabel(tr('Authentication Type:'))
         self.form_layout.addRow(self.auth_option_label)
@@ -383,6 +385,7 @@ class MainWindow(QWidget):
         self.json_option_custom.setText(self.tr('Write your own JSON'))
         self.import_json_button.setText(self.tr('Import JSON File'))
         self.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
+        self.port_label.setText(self.tr('Port:'))
         if self.server_running:
             self.status_indicator.setText(tr('Active'))
             self.toggle_button.setText(self.tr('Stop Server'))
