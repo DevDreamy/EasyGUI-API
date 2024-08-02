@@ -8,3 +8,6 @@ usa_flag = os.path.abspath(
 brazil_flag = os.path.abspath(
     os.path.join(current_dir, "..", "resources", "icons", "brazil_flag.png")
 )
+spain_flag = os.path.abspath(
+    os.path.join(current_dir, "..", "resources", "icons", "spain_flag.png")
+)

@@ -39,7 +39,7 @@ from .config import (
     DIGEST_QOP,
 )
 from .resources.styles import DARK_THEME_QSS
-from .utils import tr, brazil_flag, usa_flag
+from .utils import tr, brazil_flag, usa_flag, spain_flag
 
 
 class MainWindow(QWidget):
@@ -84,6 +84,7 @@ class MainWindow(QWidget):
             QIcon(brazil_flag),
             "Portuguese",
         )
+        self.language_selector.addItem(QIcon(spain_flag), "Spanish")
         self.language_selector.setFixedWidth(100)
         self.language_selector.currentIndexChanged.connect(self.change_language)
         self.top_bar_layout.addWidget(
@@ -371,6 +372,9 @@ class MainWindow(QWidget):
             self.import_json_button.setFixedSize(100, 20)
         elif current_language == 'Portuguese':
             self.translator.load("translations/pt_BR.qm")
+            self.import_json_button.setFixedSize(130, 20)
+        elif current_language == 'Spanish':
+            self.translator.load("translations/es_ES.qm")
             self.import_json_button.setFixedSize(130, 20)
         self.app.installTranslator(self.translator)
         self.retranslateUi()
