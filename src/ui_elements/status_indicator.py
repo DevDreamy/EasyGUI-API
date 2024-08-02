@@ -17,7 +17,6 @@ class StatusIndicator(QLabel):
         )
 
     def set_active(self):
-        self.setText('Active')
         self.setStyleSheet(
             'background-color: green;'
             'color: white;'
@@ -28,7 +27,6 @@ class StatusIndicator(QLabel):
         )
 
     def set_inactive(self):
-        self.setText('Inactive')
         self.setStyleSheet(
             'background-color: red;'
             'color: white;'

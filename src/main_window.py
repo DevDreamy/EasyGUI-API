@@ -384,7 +384,13 @@ class MainWindow(QWidget):
         self.json_option_custom.setText(self.tr('Write your own JSON'))
         self.import_json_button.setText(self.tr('Import JSON File'))
         self.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
-        self.toggle_button.setText(self.tr('Start Server'))
+        if self.server_running:
+            self.status_indicator.setText(tr('Active'))
+            self.toggle_button.setText(self.tr('Stop Server'))
+        else:
+            self.toggle_button.setText(self.tr('Start Server'))
+            self.status_indicator.setText(tr('Inactive'))
+
         self.auth_option_combo.clear()
         self.auth_option_combo.addItems(
             [
