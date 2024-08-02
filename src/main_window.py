@@ -261,7 +261,9 @@ class MainWindow(QWidget):
     def update_status_indicator(self):
         if self.server_running:
             self.status_indicator.set_active()
+            self.status_indicator.setText(tr('Active'))
         else:
+            self.status_indicator.setText(tr('Inactive'))
             self.status_indicator.set_inactive()
 
     def toggle_server(self):
@@ -308,8 +310,7 @@ class MainWindow(QWidget):
                 self.server_instance.update_json(json_data)
                 self.server_instance.start()
                 self.update_url_label()
-                self.toggle_button.setText('Stop Server')
-                self.json_enabled = True
+                self.toggle_button.setText(tr('Stop Server'))
                 self.server_running = True
 
                 self.port_input.setDisabled(True)
@@ -326,8 +327,7 @@ class MainWindow(QWidget):
                 self.server_instance.wait()
                 self.server_instance = None
 
-            self.toggle_button.setText('Start Server')
-            self.json_enabled = False
+            self.toggle_button.setText(tr('Start Server'))
             self.server_running = False
 
             self.port_input.setDisabled(False)
