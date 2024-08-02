@@ -365,11 +365,11 @@ class MainWindow(QWidget):
                 )
 
     def change_language(self):
-        current_language = self.language_selector.currentIndex()
-        if current_language == 0:
+        current_language = self.language_selector.currentText()
+        if current_language == 'English':
             self.translator.load("translations/en_US.qm")
             self.import_json_button.setFixedSize(100, 20)
-        elif current_language == 1:
+        elif current_language == 'Portuguese':
             self.translator.load("translations/pt_BR.qm")
             self.import_json_button.setFixedSize(130, 20)
         self.app.installTranslator(self.translator)
