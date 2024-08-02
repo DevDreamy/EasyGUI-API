@@ -68,6 +68,17 @@ class MainWindow(QWidget):
         self.top_bar_layout = QHBoxLayout()
         self.layout.addLayout(self.top_bar_layout)
 
+        self.url_label = QLabel()
+        self.url_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        self.top_bar_layout.addWidget(self.url_label)
+
+        spacer = QSpacerItem(
+            40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
+        self.top_bar_layout.addItem(spacer)
+
         self.language_selector = QComboBox()
         self.language_selector.addItems(
             [
@@ -83,12 +94,6 @@ class MainWindow(QWidget):
 
         self.form_layout = QFormLayout()
         self.layout.addLayout(self.form_layout)
-
-        self.url_label = QLabel()
-        self.url_label.setTextInteractionFlags(
-            Qt.TextInteractionFlag.TextSelectableByMouse
-        )
-        self.form_layout.addRow(self.url_label)
 
         spacer1 = QSpacerItem(
             0, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
