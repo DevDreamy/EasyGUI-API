@@ -48,7 +48,6 @@ class MainWindow(QWidget):
 
         self.app = app
         self.translator = translator
-        self.json_enabled = False
         self.server_instance = None
         self.custom_json = ''
         self.auth_type = 'None'
@@ -203,7 +202,7 @@ class MainWindow(QWidget):
         self.update_json_fields()
 
     def update_json_fields(self):
-        if not self.json_enabled:
+        if not self.server_running:
             if self.json_option_default.isChecked():
                 self.json_input.setDisabled(True)
                 self.json_input.setText(
@@ -260,13 +259,13 @@ class MainWindow(QWidget):
         self.update_auth_fields()
 
     def update_status_indicator(self):
-        if self.json_enabled:
+        if self.server_running:
             self.status_indicator.set_active()
         else:
             self.status_indicator.set_inactive()
 
     def toggle_server(self):
-        if not self.json_enabled:
+        if not self.server_running:
             try:
                 if self.server_instance:
                     self.server_instance.stop()
