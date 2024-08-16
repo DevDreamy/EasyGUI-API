@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QLineEdit,
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QIntValidator, QIcon
 from .auth_servers import (
     BasicAuthServer,
@@ -279,77 +279,89 @@ class MainWindow(QWidget):
 
     def toggle_server(self):
         if not self.server_running:
-            try:
-                if self.server_instance:
-                    self.server_instance.stop()
-                    self.server_instance = None
-
-                if self.json_option_custom.isChecked():
-                    self.custom_json = self.json_input.toPlainText()
-                    json_data = json.loads(self.custom_json)
-                else:
-                    self.custom_json = json.dumps(
-                        {'message': 'This is the default JSON response'},
-                        indent=4,
-                    )
-                    json_data = json.loads(self.custom_json)
-
-                port = (
-                    int(self.port_input.text())
-                    if self.port_input.text().isdigit()
-                    else 4000
-                )
-                if not (1 <= port <= 65535):
-                    QMessageBox.critical(
-                        self, 'Error', 'Port must be between 1 and 65535!'
-                    )
-                    return
-
-                if self.auth_type == 'Basic Auth':
-                    self.server_instance = BasicAuthServer(port=port)
-                elif self.auth_type == 'JWT Bearer Auth':
-                    self.server_instance = JwtAuthServer(port=port)
-                elif self.auth_type == 'OAuth2':
-                    self.server_instance = OAuth2Server(port=port)
-                elif self.auth_type == 'API Key':
-                    self.server_instance = ApiKeyAuthServer(port=port)
-                elif self.auth_type == 'Digest':
-                    self.server_instance = DigestAuthServer(port=port)
-                else:
-                    self.server_instance = NoAuthServer(port=port)
-
-                self.server_instance.update_json(json_data)
-                self.server_instance.start()
-                self.update_url_label()
-                self.toggle_button.setText(self.tr('Stop Server'))
-                self.server_running = True
-
-                self.port_input.setDisabled(True)
-                self.json_option_default.setDisabled(True)
-                self.json_option_custom.setDisabled(True)
-                self.auth_option_combo.setDisabled(True)
-                self.import_json_button.setDisabled(True)
-                self.update_status_indicator()
-            except json.JSONDecodeError:
-                QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
+            self.start_server()
         else:
+            self.stop_server()
+
+    def start_server(self):
+        self.toggle_button.setDisabled(True)
+        self.toggle_layout_form(True)
+        self.setCursor(Qt.WaitCursor)
+
+        QTimer.singleShot(1000, self._start_server)
+
+    def stop_server(self):
+        self.toggle_button.setDisabled(True)
+        self.setCursor(Qt.WaitCursor)
+
+        QTimer.singleShot(1000, self._stop_server)
+
+    def _start_server(self):
+        try:
             if self.server_instance:
-                self.server_instance.stop()
-                self.server_instance.wait()
                 self.server_instance = None
 
-            self.toggle_button.setText(self.tr('Start Server'))
-            self.server_running = False
+            if self.json_option_custom.isChecked():
+                self.custom_json = self.json_input.toPlainText()
+                json_data = json.loads(self.custom_json)
+            else:
+                self.custom_json = json.dumps(
+                    {'message': 'This is the default JSON response'},
+                    indent=4,
+                )
+                json_data = json.loads(self.custom_json)
 
-            self.port_input.setDisabled(False)
-            self.json_option_default.setDisabled(False)
-            self.json_option_custom.setDisabled(False)
-            self.auth_option_combo.setDisabled(False)
-            self.import_json_button.setDisabled(False)
+            port = (
+                int(self.port_input.text())
+                if self.port_input.text().isdigit()
+                else 4000
+            )
+            if not (1 <= port <= 65535):
+                QMessageBox.critical(
+                    self, 'Error', 'Port must be between 1 and 65535!'
+                )
+                return
 
-            self.update_json_fields()
-            self.update_auth_fields()
+            if self.auth_type == 'Basic Auth':
+                self.server_instance = BasicAuthServer(port=port)
+            elif self.auth_type == 'JWT Bearer Auth':
+                self.server_instance = JwtAuthServer(port=port)
+            elif self.auth_type == 'OAuth2':
+                self.server_instance = OAuth2Server(port=port)
+            elif self.auth_type == 'API Key':
+                self.server_instance = ApiKeyAuthServer(port=port)
+            elif self.auth_type == 'Digest':
+                self.server_instance = DigestAuthServer(port=port)
+            else:
+                self.server_instance = NoAuthServer(port=port)
+
+            self.server_instance.update_json(json_data)
+            self.server_instance.start()
+            self.update_url_label()
+            self.toggle_button.setText(self.tr('Stop Server'))
+            self.server_running = True
             self.update_status_indicator()
+        except json.JSONDecodeError:
+            QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
+            self.toggle_layout_form(False)
+        finally:
+            self.toggle_button.setDisabled(False)
+            self.unsetCursor()
+
+    def _stop_server(self):
+        if self.server_instance:
+            self.server_instance.stop()
+            self.server_instance = None
+
+        self.toggle_button.setText(self.tr('Start Server'))
+        self.server_running = False
+
+        self.update_json_fields()
+        self.update_auth_fields()
+        self.update_status_indicator()
+        self.toggle_layout_form(False)
+        self.toggle_button.setDisabled(False)
+        self.unsetCursor()
 
     def import_json(self):
         options = QFileDialog.Options()
@@ -373,6 +385,13 @@ class MainWindow(QWidget):
                 QMessageBox.critical(
                     self, 'Error', f'Failed to load JSON file: {str(e)}'
                 )
+
+    def toggle_layout_form(self, status):
+        self.port_input.setDisabled(status)
+        self.json_option_default.setDisabled(status)
+        self.json_option_custom.setDisabled(status)
+        self.auth_option_combo.setDisabled(status)
+        self.import_json_button.setDisabled(status)
 
     def change_language(self):
         current_language = self.language_selector.currentText()
