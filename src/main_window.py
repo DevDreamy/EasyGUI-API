@@ -2,21 +2,9 @@ import json
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
     QMessageBox,
-    QCheckBox,
-    QComboBox,
-    QFormLayout,
-    QSpacerItem,
-    QSizePolicy,
-    QFileDialog,
-    QTextEdit,
-    QLineEdit,
 )
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QIntValidator, QIcon
 from .auth_servers import (
     BasicAuthServer,
     JwtAuthServer,
@@ -25,7 +13,12 @@ from .auth_servers import (
     ApiKeyAuthServer,
     DigestAuthServer,
 )
-from .ui_elements import AuthInfo, StatusIndicator
+from .ui_elements import (
+    TopBar,
+    BottomBar,
+    Form,
+    ServerButton,
+)
 from .config import (
     DEFAULT_USERNAME,
     DEFAULT_PASSWORD,
@@ -39,7 +32,7 @@ from .config import (
     DIGEST_QOP,
 )
 from .resources.styles import DARK_THEME_QSS
-from .utils import tr, brazil_flag, usa_flag, spain_flag
+from .utils import tr
 
 
 class MainWindow(QWidget):
@@ -65,193 +58,67 @@ class MainWindow(QWidget):
         self.layout = QVBoxLayout()
 
         # Top bar layout
-        self.top_bar_layout = QHBoxLayout()
-        self.url_label = QLabel()
-        self.url_label.setTextInteractionFlags(
-            Qt.TextInteractionFlag.TextSelectableByMouse
-        )
-        self.top_bar_layout.addWidget(self.url_label)
-
-        self.language_selector = QComboBox()
-        self.language_selector.addItem(QIcon(usa_flag), "English")
-        self.language_selector.addItem(QIcon(brazil_flag), "Portuguese")
-        self.language_selector.addItem(QIcon(spain_flag), "Spanish")
-        self.language_selector.setFixedWidth(120)
-        self.language_selector.currentIndexChanged.connect(self.change_language)
-        self.top_bar_layout.addWidget(
-            self.language_selector, alignment=Qt.AlignmentFlag.AlignRight
-        )
-
-        self.layout.addLayout(self.top_bar_layout)
+        self.top_bar = TopBar(self)
+        self.layout.addWidget(self.top_bar)
 
         # Form layout
-        self.form_layout = QFormLayout()
-
-        spacer1 = QSpacerItem(
-            0, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
-        )
-        spacer_layout1 = QVBoxLayout()
-        spacer_layout1.addItem(spacer1)
-        self.form_layout.addRow('', spacer_layout1)
-
-        self.port_label = QLabel(self.tr('Port:'))
-        self.port_input = QLineEdit()
-        self.port_input.setPlaceholderText(
-            self.tr('Enter port (default is 4000)')
-        )
-        self.port_input.setValidator(QIntValidator(1, 65535))
-        self.port_input.textChanged.connect(self.update_url_label)
-        self.form_layout.addRow(self.port_label, self.port_input)
-
-        spacer2 = QSpacerItem(
-            0, 5, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
-        )
-        spacer_layout2 = QVBoxLayout()
-        spacer_layout2.addItem(spacer2)
-        self.form_layout.addRow('', spacer_layout2)
-
-        self.auth_option_label = QLabel(self.tr('Authentication Type:'))
-        self.form_layout.addRow(self.auth_option_label)
-
-        self.auth_option_combo = QComboBox()
-        self.auth_option_combo.addItems(
-            [
-                self.tr('None'),
-                self.tr('Basic Auth'),
-                self.tr('JWT Bearer Auth'),
-                self.tr('OAuth2'),
-                self.tr('API Key'),
-                self.tr('Digest'),
-            ]
-        )
-        self.auth_option_combo.currentIndexChanged.connect(
-            self.update_auth_fields
-        )
-        self.form_layout.addRow(self.auth_option_combo)
-
-        self.auth_info = AuthInfo()
-        self.form_layout.addRow(self.auth_info)
-
-        self.json_option_label = QLabel(self.tr('JSON Response:'))
-        self.form_layout.addRow(self.json_option_label)
-
-        self.json_option_default = QCheckBox(self.tr('Use default JSON'))
-        self.json_option_custom = QCheckBox(self.tr('Write your own JSON'))
-        self.json_option_default.setChecked(True)
-
-        self.json_option_default.toggled.connect(self.handle_json_selection)
-        self.json_option_custom.toggled.connect(self.handle_json_selection)
-
-        json_layout = QVBoxLayout()
-        json_layout.addWidget(self.json_option_default)
-        json_layout.addWidget(self.json_option_custom)
-        self.form_layout.addRow(json_layout)
-
-        self.import_json_button = QPushButton(self.tr('Import JSON File'))
-        self.import_json_button.setFixedSize(120, 26)
-        self.import_json_button.clicked.connect(self.import_json)
-        self.form_layout.addRow(self.import_json_button)
-
-        self.json_input = QTextEdit()
-        self.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
-        self.form_layout.addRow(self.json_input)
-
-        self.layout.addLayout(self.form_layout)
+        self.form = Form(self)
+        self.layout.addWidget(self.form)
 
         # Server Button
-        self.button_layout = QHBoxLayout()
-        self.button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.toggle_button = QPushButton(self.tr('Start Server'))
-        self.toggle_button.setFixedSize(200, 40)
-        self.toggle_button.setStyleSheet("font-size: 14px; padding: 8px;")
-        self.toggle_button.clicked.connect(self.toggle_server)
-        self.button_layout.addWidget(self.toggle_button)
-        self.layout.addLayout(self.button_layout)
+        self.server_button = ServerButton(self)
+        self.layout.addWidget(self.server_button)
 
         # Bottom Bar
-        self.bottom_bar_layout = QHBoxLayout()
-        self.credits_label = QLabel(
-            '<a'
-            ' style="text-decoration:none;color:#555555;"'
-            ' href="https://github.com/DevDreamy">DevDreamy'
-            '</a>'
-        )
-        self.credits_label.setOpenExternalLinks(True)
-        self.credits_label.setTextFormat(Qt.TextFormat.RichText)
-        self.credits_label.setAlignment(Qt.AlignmentFlag.AlignBottom)
-        self.bottom_bar_layout.addWidget(self.credits_label)
-        self.layout.addLayout(self.bottom_bar_layout)
-
-        self.status_layout = QHBoxLayout()
-        self.status_indicator = StatusIndicator()
-        self.status_layout.addWidget(self.status_indicator)
-        self.bottom_bar_layout.addLayout(self.status_layout)
+        self.bottom_bar = BottomBar(self)
+        self.layout.addWidget(self.bottom_bar)
 
         self.setLayout(self.layout)
 
         self.update_json_fields()
-        self.update_status_indicator()
-        self.update_url_label()
-
-    def handle_json_selection(self):
-        if (
-            self.sender() == self.json_option_default
-            and self.json_option_default.isChecked()
-        ):
-            self.json_option_custom.setChecked(False)
-        elif (
-            self.sender() == self.json_option_custom
-            and self.json_option_custom.isChecked()
-        ):
-            self.json_option_default.setChecked(False)
-        if (
-            not self.json_option_default.isChecked()
-            and not self.json_option_custom.isChecked()
-        ):
-            self.sender().setChecked(True)
-        self.update_json_fields()
+        self.bottom_bar.update_status_indicator()
+        self.form.update_url_label()
 
     def update_json_fields(self):
         if not self.server_running:
-            if self.json_option_default.isChecked():
-                self.json_input.setDisabled(True)
-                self.json_input.setText(
+            if self.form.json_option_default.isChecked():
+                self.form.json_input.setDisabled(True)
+                self.form.json_input.setText(
                     json.dumps(
                         DEFAULT_JSON_RESPONSE,
                         indent=4,
                     )
                 )
             else:
-                self.json_input.setDisabled(False)
-                self.json_input.setText(self.custom_json)
+                self.form.json_input.setDisabled(False)
+                self.form.json_input.setText(self.custom_json)
 
     def update_auth_fields(self):
-        self.auth_type = self.auth_option_combo.currentText()
+        self.auth_type = self.form.auth_option_combo.currentText()
         if self.auth_type == 'JWT Bearer Auth':
-            self.auth_info.set_text(
+            self.form.auth_info.set_text(
                 f'<b>Token URL:</b> '
-                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]<br>'
+                f'http://localhost:{self.form.port_input.text() or "4000"}/token [POST]<br>'
                 f'<b>Username:</b> {DEFAULT_USERNAME}<br>'
                 f'<b>Password:</b> {DEFAULT_PASSWORD}<br>'
             )
         elif self.auth_type == 'Basic Auth':
-            self.auth_info.set_text(
+            self.form.auth_info.set_text(
                 f'<b>Username:</b> {DEFAULT_USERNAME}<br>'
                 f'<b>Password:</b> {DEFAULT_PASSWORD}<br>'
             )
         elif self.auth_type == 'OAuth2':
-            self.auth_info.set_text(
+            self.form.auth_info.set_text(
                 f'<b>Token URL:</b> '
-                f'http://localhost:{self.port_input.text() or "4000"}/token [POST]<br>'
+                f'http://localhost:{self.form.port_input.text() or "4000"}/token [POST]<br>'
                 f'<b>client_id:</b> {DEFAULT_CLIENT_ID}<br>'
                 f'<b>client_secret:</b> {DEFAULT_CLIENT_SECRET}<br>'
                 f'<b>grant_type:</b> {GRANT_TYPE}<br>'
             )
         elif self.auth_type == 'API Key':
-            self.auth_info.set_text(f'<b>X-API-KEY:</b> {DEFAULT_API_KEY}<br>')
+            self.form.auth_info.set_text(f'<b>X-API-KEY:</b> {DEFAULT_API_KEY}<br>')
         elif self.auth_type == 'Digest':
-            self.auth_info.set_text(
+            self.form.auth_info.set_text(
                 f'<b>Username:</b> {DEFAULT_USERNAME}<br>'
                 f'<b>Password:</b> {DEFAULT_PASSWORD}<br>'
                 f'<b>Realm:</b> {DEFAULT_REALM}<br>'
@@ -259,23 +126,7 @@ class MainWindow(QWidget):
                 f'<b>qop:</b> {DIGEST_QOP}<br>'
             )
         else:
-            self.auth_info.clear()
-
-    def update_url_label(self):
-        port = self.port_input.text()
-        if port and port.isdigit() and 1 <= int(port) <= 65535:
-            self.url_label.setText(f'URL: http://localhost:{port}')
-        else:
-            self.url_label.setText('URL: http://localhost:4000')
-        self.update_auth_fields()
-
-    def update_status_indicator(self):
-        if self.server_running:
-            self.status_indicator.set_active()
-            self.status_indicator.setText(self.tr('Active'))
-        else:
-            self.status_indicator.setText(self.tr('Inactive'))
-            self.status_indicator.set_inactive()
+            self.form.auth_info.clear()
 
     def toggle_server(self):
         if not self.server_running:
@@ -284,25 +135,25 @@ class MainWindow(QWidget):
             self.stop_server()
 
     def start_server(self):
-        self.toggle_button.setDisabled(True)
+        self.server_button.toggle_button.setDisabled(True)
         self.toggle_layout_form(True)
         self.setCursor(Qt.WaitCursor)
 
-        QTimer.singleShot(1000, self._start_server)
+        QTimer.singleShot(0, self._start_server)
 
     def stop_server(self):
-        self.toggle_button.setDisabled(True)
+        self.server_button.toggle_button.setDisabled(True)
         self.setCursor(Qt.WaitCursor)
 
-        QTimer.singleShot(1000, self._stop_server)
+        QTimer.singleShot(0, self._stop_server)
 
     def _start_server(self):
         try:
             if self.server_instance:
                 self.server_instance = None
 
-            if self.json_option_custom.isChecked():
-                self.custom_json = self.json_input.toPlainText()
+            if self.form.json_option_custom.isChecked():
+                self.custom_json = self.form.json_input.toPlainText()
                 json_data = json.loads(self.custom_json)
             else:
                 self.custom_json = json.dumps(
@@ -312,8 +163,8 @@ class MainWindow(QWidget):
                 json_data = json.loads(self.custom_json)
 
             port = (
-                int(self.port_input.text())
-                if self.port_input.text().isdigit()
+                int(self.form.port_input.text())
+                if self.form.port_input.text().isdigit()
                 else 4000
             )
             if not (1 <= port <= 65535):
@@ -337,96 +188,73 @@ class MainWindow(QWidget):
 
             self.server_instance.update_json(json_data)
             self.server_instance.start()
-            self.update_url_label()
-            self.toggle_button.setText(self.tr('Stop Server'))
+            self.form.update_url_label()
+            self.server_button.toggle_button.setText(self.tr('Stop Server'))
             self.server_running = True
-            self.update_status_indicator()
+            self.bottom_bar.update_status_indicator()
         except json.JSONDecodeError:
             QMessageBox.critical(self, 'Error', 'Invalid JSON format!')
             self.toggle_layout_form(False)
         finally:
-            self.toggle_button.setDisabled(False)
+            self.server_button.toggle_button.setDisabled(False)
             self.unsetCursor()
 
     def _stop_server(self):
         if self.server_instance:
-            self.server_instance.stop()
-            self.server_instance = None
-
-        self.toggle_button.setText(self.tr('Start Server'))
-        self.server_running = False
-
-        self.update_json_fields()
-        self.update_auth_fields()
-        self.update_status_indicator()
-        self.toggle_layout_form(False)
-        self.toggle_button.setDisabled(False)
-        self.unsetCursor()
-
-    def import_json(self):
-        options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(
-            self,
-            "Import JSON File",
-            "",
-            "JSON Files (*.json);;All Files (*)",
-            options=options,
-        )
-        if file_name:
             try:
-                with open(file_name, 'r') as file:
-                    json_data = json.load(file)
-                    formatted_json = json.dumps(json_data, indent=4)
-                    self.json_input.setText(formatted_json)
-                    self.custom_json = formatted_json
-                    self.json_option_custom.setChecked(True)
-                    self.json_option_default.setChecked(False)
-            except (json.JSONDecodeError, IOError) as e:
-                QMessageBox.critical(
-                    self, 'Error', f'Failed to load JSON file: {str(e)}'
-                )
+                self.server_instance.stop()
+                self.server_instance = None
+            except Exception as e:
+                QMessageBox.critical(self, 'Error', f'Failed to stop the server: {str(e)}')
+            finally:
+                self.server_button.toggle_button.setText(self.tr('Start Server'))
+                self.server_running = False
+                self.toggle_layout_form(False)
+                self.bottom_bar.update_status_indicator()
+                self.server_button.toggle_button.setDisabled(False)
+                self.unsetCursor()
 
     def toggle_layout_form(self, status):
-        self.port_input.setDisabled(status)
-        self.json_option_default.setDisabled(status)
-        self.json_option_custom.setDisabled(status)
-        self.auth_option_combo.setDisabled(status)
-        self.import_json_button.setDisabled(status)
+        self.form.port_input.setDisabled(status)
+        self.form.json_option_default.setDisabled(status)
+        self.form.json_option_custom.setDisabled(status)
+        self.form.auth_option_combo.setDisabled(status)
+        self.form.import_json_button.setDisabled(status)
 
     def change_language(self):
-        current_language = self.language_selector.currentText()
+        current_language = self.top_bar.language_selector.currentText()
         if current_language == 'English':
             self.translator.load("translations/en_US.qm")
-            self.import_json_button.setFixedSize(120, 26)
+            self.form.import_json_button.setFixedSize(120, 26)
         elif current_language == 'Portuguese':
             self.translator.load("translations/pt_BR.qm")
-            self.import_json_button.setFixedSize(150, 26)
+            self.form.import_json_button.setFixedSize(150, 26)
         elif current_language == 'Spanish':
             self.translator.load("translations/es_ES.qm")
-            self.import_json_button.setFixedSize(150, 26)
+            self.form.import_json_button.setFixedSize(150, 26)
         self.app.installTranslator(self.translator)
         self.retranslateUi()
 
     def retranslateUi(self):
-        self.port_input.setPlaceholderText(
+        self.form.port_input.setPlaceholderText(
             self.tr('Enter port (default is 4000)')
         )
-        self.auth_option_label.setText(self.tr('Authentication Type:'))
-        self.json_option_label.setText(self.tr('JSON Response:'))
-        self.json_option_default.setText(self.tr('Use default JSON'))
-        self.json_option_custom.setText(self.tr('Write your own JSON'))
-        self.import_json_button.setText(self.tr('Import JSON File'))
-        self.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
-        self.port_label.setText(self.tr('Port:'))
+        self.form.auth_option_label.setText(self.tr('Authentication Type:'))
+        self.form.json_option_label.setText(self.tr('JSON Response:'))
+        self.form.json_option_default.setText(self.tr('Use default JSON'))
+        self.form.json_option_custom.setText(self.tr('Write your own JSON'))
+        self.form.import_json_button.setText(self.tr('Import JSON File'))
+        self.form.json_input.setPlaceholderText(self.tr('Enter JSON here...'))
+        self.form.port_label.setText(self.tr('Port:'))
         if self.server_running:
-            self.status_indicator.setText(tr('Active'))
-            self.toggle_button.setText(self.tr('Stop Server'))
+            self.bottom_bar.status_indicator.setText(tr('Active'))
+            self.server_button.toggle_button.setText(self.tr('Stop Server'))
         else:
-            self.toggle_button.setText(self.tr('Start Server'))
-            self.status_indicator.setText(tr('Inactive'))
+            self.server_button.toggle_button.setText(self.tr('Start Server'))
+            self.bottom_bar.status_indicator.setText(tr('Inactive'))
 
-        self.auth_option_combo.clear()
-        self.auth_option_combo.addItems(
+        self.form.auth_option_combo.clear()
+        self.form.auth_option_combo.addItems(
             [
                 self.tr('None'),
                 self.tr('Basic Auth'),
