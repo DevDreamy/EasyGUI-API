@@ -4,144 +4,105 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/main_window.py" line="106"/>
-        <source>Enter port (default is 4000)</source>
-        <translation>Ingrese el puerto (el valor predeterminado es 4000)</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="111"/>
-        <source>Authentication Type:</source>
-        <translation>Tipo de Autenticación:</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="140"/>
-        <source>JSON Response:</source>
-        <translation>Respuesta JSON:</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="143"/>
-        <source>Use default JSON</source>
-        <translation>Usar JSON predeterminado</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="144"/>
-        <source>Write your own JSON</source>
-        <translation>Escribir tu propio JSON</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="155"/>
-        <source>Import JSON File</source>
-        <translation>Importar archivo JSON</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="161"/>
-        <source>Enter JSON here...</source>
-        <translation>Ingrese JSON aquí...</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="168"/>
-        <location filename="../src/main_window.py" line="331"/>
-        <source>Start Server</source>
-        <translation>Iniciar Servidor</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="265"/>
-        <location filename="../src/main_window.py" line="390"/>
+        <location filename="../src/main_window.py" line="255"/>
         <source>Active</source>
         <translation>Activo</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="267"/>
-        <location filename="../src/main_window.py" line="394"/>
+        <location filename="../src/main_window.py" line="259"/>
         <source>Inactive</source>
         <translation>Inactivo</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="314"/>
-        <source>Stop Server</source>
-        <translation>Detener Servidor</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/main_window.py" line="104"/>
-        <location filename="../src/main_window.py" line="388"/>
-        <source>Port:</source>
-        <translation>Puerto:</translation>
+        <source>Active</source>
+        <translation type="obsolete">Activo</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="381"/>
+        <source>Inactive</source>
+        <translation type="obsolete">Inactivo</translation>
+    </message>
+    <message>
+        <location filename="../src/main_window.py" line="246"/>
         <source>Enter port (default is 4000)</source>
         <translation>Ingrese el puerto (el valor predeterminado es 4000)</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="382"/>
+        <location filename="../src/main_window.py" line="247"/>
         <source>Authentication Type:</source>
         <translation>Tipo de Autenticación:</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="383"/>
+        <location filename="../src/main_window.py" line="248"/>
         <source>JSON Response:</source>
         <translation>Respuesta JSON:</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="384"/>
+        <location filename="../src/main_window.py" line="249"/>
         <source>Use default JSON</source>
         <translation>Usar JSON predeterminado</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="385"/>
+        <location filename="../src/main_window.py" line="250"/>
         <source>Write your own JSON</source>
         <translation>Escribir tu propio JSON</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="386"/>
+        <location filename="../src/main_window.py" line="251"/>
         <source>Import JSON File</source>
         <translation>Importar archivo JSON</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="387"/>
+        <location filename="../src/main_window.py" line="252"/>
         <source>Enter JSON here...</source>
         <translation>Ingrese JSON aquí...</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="391"/>
-        <source>Stop Server</source>
-        <translation>Detener Servidor</translation>
-    </message>
-    <message>
-        <location filename="../src/main_window.py" line="393"/>
+        <location filename="../src/main_window.py" line="215"/>
+        <location filename="../src/main_window.py" line="258"/>
         <source>Start Server</source>
         <translation>Iniciar Servidor</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="399"/>
+        <location filename="../src/main_window.py" line="192"/>
+        <location filename="../src/main_window.py" line="256"/>
+        <source>Stop Server</source>
+        <translation>Detener Servidor</translation>
+    </message>
+    <message>
+        <location filename="../src/main_window.py" line="253"/>
+        <source>Port:</source>
+        <translation>Puerto:</translation>
+    </message>
+    <message>
+        <location filename="../src/main_window.py" line="264"/>
         <source>None</source>
         <translation>Ninguno</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="400"/>
+        <location filename="../src/main_window.py" line="265"/>
         <source>Basic Auth</source>
         <translation>Autenticación Básica</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="401"/>
+        <location filename="../src/main_window.py" line="266"/>
         <source>JWT Bearer Auth</source>
         <translation>Autenticación JWT Bearer</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="402"/>
+        <location filename="../src/main_window.py" line="267"/>
         <source>OAuth2</source>
         <translation>OAuth2</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="403"/>
+        <location filename="../src/main_window.py" line="268"/>
         <source>API Key</source>
         <translation>Clave API</translation>
     </message>
     <message>
-        <location filename="../src/main_window.py" line="404"/>
+        <location filename="../src/main_window.py" line="269"/>
         <source>Digest</source>
         <translation>Digest</translation>
     </message>
