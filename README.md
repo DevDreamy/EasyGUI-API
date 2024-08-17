@@ -92,3 +92,7 @@ It aims to support novice programmers by offering an easy-to-use tool for simula
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+___
+
+<a href="https://www.flaticon.com/free-icons/flags" title="flags icons">Flags icons created by Freepik - Flaticon</a>
