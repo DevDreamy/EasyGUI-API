@@ -203,16 +203,21 @@ class MainWindow(QWidget):
         if self.server_instance:
             try:
                 self.server_instance.stop()
-                self.server_instance = None
+                self.server_instance.wait()
+
+                self.on_server_stopped()
             except Exception as e:
                 QMessageBox.critical(self, 'Error', f'Failed to stop the server: {str(e)}')
-            finally:
-                self.server_button.toggle_button.setText(self.tr('Start Server'))
-                self.server_running = False
-                self.toggle_layout_form(False)
-                self.bottom_bar.update_status_indicator()
-                self.server_button.toggle_button.setDisabled(False)
-                self.unsetCursor()
+                self.on_server_stopped()
+
+    def on_server_stopped(self):
+        self.server_instance = None
+        self.server_button.toggle_button.setText(self.tr('Start Server'))
+        self.server_running = False
+        self.toggle_layout_form(False)
+        self.bottom_bar.update_status_indicator()
+        self.server_button.toggle_button.setDisabled(False)
+        self.unsetCursor()
 
     def toggle_layout_form(self, status):
         self.form.port_input.setDisabled(status)
