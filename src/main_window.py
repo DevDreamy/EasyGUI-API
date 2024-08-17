@@ -49,7 +49,7 @@ class MainWindow(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('EasyGUI API v1.2.0')
+        self.setWindowTitle('EasyGUI API v1.2.1')
         self.resize(400, 600)
 
         stylesheet = DARK_THEME_QSS
