@@ -40,12 +40,13 @@ class BaseServer(QThread):
         self._app = Flask(__name__)
 
     def run(self):
-        self._server = make_server('localhost', self.port, self._app)
+        self._server = make_server('localhost', self.port, self._app, True)
         self._server.serve_forever()
 
     def stop(self):
         if self._server:
             self._server.shutdown()
+            self.finished.emit()
 
     def update_json(self, new_json):
         self.json_data = new_json
